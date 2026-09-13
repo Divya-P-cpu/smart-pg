@@ -1,0 +1,214 @@
+import React from 'react';
+import PGCard from './PGCard';
+
+export default function UserDashboard({ 
+  user, 
+  pgs, 
+  savedIds, 
+  compareIds, 
+  bookingRequests, 
+  onToggleSave, 
+  onToggleCompare, 
+  onViewDetails, 
+  onNavigateToSearch,
+  onOpenPrefs 
+}) {
+  
+  // Filter user's personal booking requests
+  const myRequests = bookingRequests.filter(
+    b => b.userName.toLowerCase() === user.name.toLowerCase()
+  );
+
+  // Filter saved properties
+  const savedPgs = pgs.filter(p => savedIds.has(p.id));
+
+  // Get recommended properties (top 3)
+  const recommendedPgs = pgs
+    .map(p => ({
+      ...p,
+      // Add match object computed during load
+      matchScore: p.match?.score || 85
+    }))
+    .sort((a, b) => b.matchScore - a.matchScore)
+    .slice(0, 3);
+
+  const getStatusBadgeClass = (status) => {
+    switch (status) {
+      case 'approved': return 'badge-green';
+      case 'rejected': return 'badge-red';
+      default: return 'badge-amber';
+    }
+  };
+
+  return (
+    <div className="user-dashboard-wrap" style={{ padding: '24px' }}>
+      {/* Hello / Welcome Section */}
+      <div className="dashboard-welcome-card" style={{
+        background: 'linear-gradient(135deg, var(--accent) 0%, #1e1b4b 100%)',
+        color: '#fff',
+        borderRadius: 'var(--radius)',
+        padding: '24px',
+        marginBottom: '24px',
+        position: 'relative',
+        overflow: 'hidden',
+        boxShadow: 'var(--shadow-lg)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative', zIndex: 2 }}>
+          <div style={{
+            width: '60px',
+            height: '60px',
+            borderRadius: '50%',
+            background: 'rgba(255,255,255,0.2)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '22px',
+            fontWeight: 800
+          }}>
+            {user.name ? user.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() : 'US'}
+          </div>
+          <div>
+            <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0 }}>Hello, {user.name || 'User'}!</h2>
+            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', marginTop: '4px', margin: 0 }}>
+              Find a premium PG space matching your exact preferences.
+            </p>
+          </div>
+        </div>
+        <div className="welcome-bg-shape" style={{
+          position: 'absolute',
+          right: '-50px',
+          bottom: '-50px',
+          width: '180px',
+          height: '180px',
+          borderRadius: '50%',
+          background: 'rgba(255,255,255,0.06)',
+          zIndex: 1
+        }}></div>
+      </div>
+
+      {/* Quick Search Redirect Card */}
+      <div className="card" style={{ padding: '18px', marginBottom: '24px' }}>
+        <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <i className="fas fa-search-location" style={{ color: 'var(--accent)' }}></i> Need to search adjacent localities?
+        </h3>
+        <p style={{ fontSize: '12.5px', color: 'var(--muted)', marginBottom: '16px' }}>
+          Launch our smart search engine with advanced radius filters and date parameters.
+        </p>
+        <button className="btn-primary" onClick={() => onNavigateToSearch(null)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          LAUNCH SEARCH FILTERS <i className="fas fa-arrow-right"></i>
+        </button>
+      </div>
+
+      {/* My Bookings & Requests Section */}
+      <div style={{ marginBottom: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 800 }}>My Booking Requests</h3>
+          <span className="badge" style={{ background: 'var(--accent-light)', color: 'var(--accent-dark)', fontWeight: 700 }}>
+            {myRequests.length} Active
+          </span>
+        </div>
+
+        {myRequests.length === 0 ? (
+          <div className="card text-center" style={{ padding: '24px', color: 'var(--muted)' }}>
+            <i className="fas fa-calendar-check" style={{ fontSize: '28px', color: 'var(--border)', marginBottom: '8px' }}></i>
+            <p style={{ fontSize: '13px', margin: 0 }}>No booking requests submitted yet.</p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {myRequests.map(b => (
+              <div key={b.id} className="card" style={{
+                padding: '16px',
+                borderLeft: `4px solid ${b.status === 'approved' ? 'var(--available)' : b.status === 'rejected' ? 'var(--occupied)' : 'var(--reserved)'}`
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '14.5px', fontWeight: 700 }}>{b.pgName}</span>
+                  <span className={`badge ${getStatusBadgeClass(b.status)}`} style={{ fontSize: '10.5px' }}>
+                    {b.status.toUpperCase()}
+                  </span>
+                </div>
+                <div style={{ fontSize: '12.5px', color: 'var(--muted)', display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
+                  <span><i className="fas fa-bed"></i> {b.roomName} &middot; {b.bedNumber}</span>
+                  <span><i className="fas fa-indian-rupee-sign"></i> Rs.{b.rent}/mo</span>
+                  <span><i className="fas fa-calendar"></i> {b.date}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Recommended PGs Section */}
+      <div style={{ marginBottom: '24px' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 800, marginBottom: '12px' }}>Smart Recommended Stays</h3>
+        <div className="pg-grid">
+          {recommendedPgs.map(pg => (
+            <PGCard
+              key={pg.id}
+              pg={pg}
+              userPreferences={user}
+              isSaved={savedIds.has(pg.id)}
+              isCompared={compareIds.has(pg.id)}
+              onToggleSave={onToggleSave}
+              onToggleCompare={onToggleCompare}
+              onViewDetails={onViewDetails}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Saved PGs Quick Grid */}
+      <div style={{ marginBottom: '24px' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 800, marginBottom: '12px' }}>Bookmarked Properties</h3>
+        {savedPgs.length === 0 ? (
+          <div className="card text-center" style={{ padding: '24px', color: 'var(--muted)' }}>
+            <i className="fas fa-heart" style={{ fontSize: '28px', color: 'var(--border)', marginBottom: '8px' }}></i>
+            <p style={{ fontSize: '13px', margin: 0 }}>Your bookmarked properties will appear here.</p>
+          </div>
+        ) : (
+          <div className="pg-grid">
+            {savedPgs.map(pg => (
+              <PGCard
+                key={pg.id}
+                pg={pg}
+                userPreferences={user}
+                isSaved={savedIds.has(pg.id)}
+                isCompared={compareIds.has(pg.id)}
+                onToggleSave={onToggleSave}
+                onToggleCompare={onToggleCompare}
+                onViewDetails={onViewDetails}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Quick Preferences Overview Card */}
+      <div className="card" style={{ padding: '18px' }}>
+        <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <i className="fas fa-sliders" style={{ color: 'var(--accent)' }}></i> My Matching Filters
+        </h3>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 16px', marginBottom: '16px', fontSize: '12.5px' }}>
+          <div>
+            <span style={{ color: 'var(--muted)' }}>Target locality:</span>
+            <div style={{ fontWeight: 600, marginTop: '2px' }}>{user.workLocation || 'Madhapur, Hyderabad'}</div>
+          </div>
+          <div>
+            <span style={{ color: 'var(--muted)' }}>Max Budget limit:</span>
+            <div style={{ fontWeight: 600, marginTop: '2px' }}>Rs.{user.budgetMax ? user.budgetMax.toLocaleString() : 'No Limit'}</div>
+          </div>
+          <div>
+            <span style={{ color: 'var(--muted)' }}>Sharing counts:</span>
+            <div style={{ fontWeight: 600, marginTop: '2px' }}>{user.sharing || 3} Sharing</div>
+          </div>
+          <div>
+            <span style={{ color: 'var(--muted)' }}>Preferred Move-in:</span>
+            <div style={{ fontWeight: 600, marginTop: '2px' }}>{user.moveIn || '2026-08-20'}</div>
+          </div>
+        </div>
+        <button className="btn-secondary" onClick={onOpenPrefs} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <i className="fas fa-user-pen"></i> EDIT PREFERENCES
+        </button>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,565 @@
+import React, { useState } from 'react';
+import { AREAS } from '../utils/constants';
+
+export default function Home({ onNavigateToSearch, onNavigateToLogin, isLoggedIn, role }) {
+  // Local Search Preview State
+  const [areaInput, setAreaInput] = useState('');
+  const [selectedArea, setSelectedArea] = useState(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  
+  const [budget, setBudget] = useState(''); // Nullable input (empty string)
+  const [sharing, setSharing] = useState(3);
+  const [moveInDate, setMoveInDate] = useState('2026-08-20');
+
+  // Suggestion & Query Form State
+  const [queryName, setQueryName] = useState('');
+  const [queryEmail, setQueryEmail] = useState('');
+  const [queryUserType, setQueryUserType] = useState('User');
+  const [querySubject, setQuerySubject] = useState('');
+  const [queryMessage, setQueryMessage] = useState('');
+  const [querySubmitted, setQuerySubmitted] = useState(false);
+
+  const handleQuerySubmit = (e) => {
+    e.preventDefault();
+    if (!queryName || !queryEmail || !queryMessage) return;
+    setQuerySubmitted(true);
+    setTimeout(() => {
+      setQuerySubmitted(false);
+      setQueryName('');
+      setQueryEmail('');
+      setQuerySubject('');
+      setQueryMessage('');
+    }, 3000);
+  };
+
+  // Filter suggestions
+  const suggestions = areaInput
+    ? AREAS.filter(a =>
+        a.name.toLowerCase().includes(areaInput.toLowerCase()) ||
+        a.city.toLowerCase().includes(areaInput.toLowerCase())
+      )
+    : [];
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    // Navigate to search screen with selected preview states
+    onNavigateToSearch({
+      area: selectedArea ? selectedArea.name : areaInput,
+      location: selectedArea ? selectedArea.name : areaInput,
+      city: selectedArea ? selectedArea.city : 'Hyderabad',
+      lat: selectedArea ? selectedArea.lat : 17.4483,
+      lng: selectedArea ? selectedArea.lng : 78.3915,
+      budgetMax: budget ? parseInt(budget) : null,
+      sharing: sharing,
+      moveInDate: moveInDate
+    });
+  };
+
+  return (
+    <div className="homepage-wrap">
+      {/* Premium Hero Section */}
+      <section className="hero-sec">
+        <div className="hero-content">
+          <div className="badge-wrapper">
+            <span className="hero-badge">
+              <i className="fas fa-sparkles"></i> AI-Powered Smart Matching
+            </span>
+          </div>
+          <h1>Find a PG That <span className="highlight-text">Actually Fits</span> Your Requirements.</h1>
+          <p>
+            Search PGs by location, budget, sharing size, move-in date, and amenities. Compare your options and see real-time bed-level availability matching your personal preferences.
+          </p>
+          <div className="hero-actions">
+            <button className="hero-btn-primary" onClick={() => onNavigateToSearch(null)}>
+              Find Your PG <i className="fas fa-arrow-right"></i>
+            </button>
+            <button className="hero-btn-secondary" onClick={() => onNavigateToLogin('owner')}>
+              I'm a PG Owner <i className="fas fa-house-chimney"></i>
+            </button>
+          </div>
+        </div>
+        <div className="hero-media">
+          <div className="hero-image-card">
+            <img src="https://picsum.photos/seed/cozyliving/800/500" alt="Beautiful PG Room" className="hero-img" />
+            <div className="overlay-badge badge-top">
+              <i className="fas fa-heart-circle-check text-green"></i> 98% Match Rating
+            </div>
+            <div className="overlay-badge badge-bottom">
+              <span className="dot dot-green animate-pulse"></span> 42 Beds Available Today
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Visual Search Preview Component */}
+      <section className="search-preview-section">
+        <div className="section-header text-center">
+          <h2>Start Your Search</h2>
+          <p>Configure a quick preview of your preferences to see matching accommodations</p>
+        </div>
+
+        <form onSubmit={handleSearchSubmit} className="search-preview-card">
+          <div className="preview-grid">
+            
+            {/* Where to stay */}
+            <div className="input-group-preview location-group">
+              <label><i className="fas fa-location-dot"></i> Where do you want to stay?</label>
+              <input
+                type="text"
+                placeholder="Search area (e.g. Madhapur, HSR Layout)"
+                value={areaInput}
+                onChange={(e) => {
+                  setAreaInput(e.target.value);
+                  setSelectedArea(null);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+              />
+              
+              {/* Autocomplete dynamic suggestions */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="preview-suggestions-box">
+                  {suggestions.map((area, idx) => (
+                    <div
+                      key={idx}
+                      className="suggestion-row"
+                      onClick={() => {
+                        setSelectedArea(area);
+                        setAreaInput(`${area.name}, ${area.city}`);
+                        setShowSuggestions(false);
+                      }}
+                    >
+                      <i className="fas fa-location-crosshairs text-green"></i>
+                      <div>
+                        <strong>{area.name}</strong>
+                        <span>{area.city}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Budget */}
+            <div className="input-group-preview">
+              <label><i className="fas fa-indian-rupee-sign"></i> Max Budget</label>
+              <input
+                type="number"
+                placeholder="Enter max amount (e.g. 8000)"
+                value={budget}
+                onChange={(e) => setBudget(e.target.value)}
+              />
+            </div>
+
+            {/* Sharing */}
+            <div className="input-group-preview">
+              <label><i className="fas fa-user-group"></i> Sharing Preference</label>
+              <div className="sharing-selector">
+                {[1, 2, 3, 4].map(num => (
+                  <button
+                    key={num}
+                    type="button"
+                    className={`sharing-btn ${sharing === num ? 'active' : ''}`}
+                    onClick={() => setSharing(num)}
+                  >
+                    {num} <span className="sharing-lbl">{num === 1 ? 'Single' : 'Share'}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Move-in Date */}
+            <div className="input-group-preview">
+              <label><i className="fas fa-calendar-days"></i> Move-in Date</label>
+              <input
+                type="date"
+                min="2026-08-20"
+                value={moveInDate}
+                onChange={(e) => setMoveInDate(e.target.value)}
+              />
+            </div>
+
+          </div>
+
+          <button type="submit" className="btn-search-preview">
+            <i className="fas fa-magnifying-glass"></i> FIND MATCHING PGS
+          </button>
+        </form>
+      </section>
+
+      {/* WHAT WE PROVIDE Section */}
+      <section className="features-section">
+        <div className="section-header text-center">
+          <span className="sub-title">Services</span>
+          <h2>WHAT WE PROVIDE</h2>
+          <p>Discover how our smart PG finder matches you with the ideal living space</p>
+        </div>
+
+        <div className="features-grid">
+          {[
+            { icon: 'fa-location-dot', color: '#10B981', title: 'Smart Location Search', desc: 'Find premium PGs exactly around your preferred workplace or educational hub.' },
+            { icon: 'fa-indian-rupee-sign', color: '#F59E0B', title: 'Budget-Based Search', desc: 'Filter properties by rent packages that match your financial comfort zone.' },
+            { icon: 'fa-bed', color: '#3B82F6', title: 'Room & Bed Availability', desc: 'Real-time booking indicators. View and select the exact bunk position available.' },
+            { icon: 'fa-calendar-days', color: '#EC4899', title: 'Move-in Timing', desc: 'Check immediate available room inventories matching your exact relocation date.' },
+            { icon: 'fa-hotel', color: '#8B5CF6', title: 'Multiple PG Options', desc: 'Browse the entire localized inventory. We do not restrict or filter out candidate listings.' },
+            { icon: 'fa-circle-check', color: '#EF4444', title: 'Smart Matching Score', desc: 'Dynamic scoring engine measuring how closely each PG matches your requirements.' },
+            { icon: 'fa-route', color: '#06B6D4', title: 'Nearby Essentials', desc: 'Review walking distances to local metros, malls, pharmacies, and food joints.' },
+            { icon: 'fa-columns', color: '#6B7280', title: 'Side-by-Side Comparison', desc: 'Select and compare up to 3 options side-by-side to make the optimal decision.' }
+          ].map((feat, idx) => (
+            <div className="feature-card-premium" key={idx}>
+              <div className="feat-icon-wrap" style={{ background: `${feat.color}18`, color: feat.color }}>
+                <i className={`fas ${feat.icon}`}></i>
+              </div>
+              <h3>{feat.title}</h3>
+              <p>{feat.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* HOW IT WORKS Section */}
+      <section className="how-it-works-sec">
+        <div className="section-header text-center">
+          <span className="sub-title">Process</span>
+          <h2>HOW IT WORKS</h2>
+          <p>A simple, step-by-step path to locking in your perfect bed space</p>
+        </div>
+
+        <div className="timeline-interactive">
+          {[
+            { step: '1', title: 'Enter Location', desc: 'Type in your target locality or office hub to find adjacent PGs.' },
+            { step: '2', title: 'Define Budget', desc: 'Input your max monthly rental limit without forced minimum entries.' },
+            { step: '3', title: 'Select Move-in & Amenities', desc: 'Input move-in timing and check required amenities like Wi-Fi, Food, and Lift.' },
+            { step: '4', title: 'View Matches', desc: 'Review dynamic results sorted by an exact requirement matching score.' },
+            { step: '5', title: 'Compare PGs', desc: 'Pick top matching accommodations and review amenities side-by-side.' },
+            { step: '6', title: 'See Available Beds', desc: 'Click verified room layouts and see exact available beds (marked green).' },
+            { step: '7', title: 'Submit Booking', desc: 'Select a bed, review rent & deposit breakdown, and request instantly.' }
+          ].map((item, idx) => (
+            <div className="timeline-node" key={idx}>
+              <div className="node-number">{item.step}</div>
+              <div className="node-content">
+                <h4>{item.title}</h4>
+                <p>{item.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Segment CTAs */}
+      <section className="cta-segments" style={{ padding: '30px 24px' }}>
+        {/* For Students & Professionals */}
+        <div className="cta-card user-cta-card">
+          <div className="cta-inner">
+            <span className="cta-tag">FOR STUDENTS & PROFESSIONALS</span>
+            <h3>Looking for a hassle-free place to stay?</h3>
+            <p>
+              Find nearby PGs, filter by sharing counts, select move-in dates, check facilities, compare rooms, check exact bed hotspots on photographs, and reserve your space.
+            </p>
+            <button className="cta-btn btn-user-cta" onClick={() => onNavigateToSearch(null)}>
+              FIND YOUR PG NOW <i className="fas fa-search"></i>
+            </button>
+          </div>
+        </div>
+
+        {/* For PG Owners */}
+        <div className="cta-card owner-cta-card">
+          <div className="cta-inner">
+            <span className="cta-tag tag-owner">FOR PG OWNERS</span>
+            <h3>Want to list your properties and manage beds?</h3>
+            <p>
+              Register your PG, upload room layouts, mark bed hotspots, set pricing packages, manage availability, review booking request logs, and check occupancy metrics.
+            </p>
+            <button className="cta-btn btn-owner-cta" onClick={() => onNavigateToLogin('owner')}>
+              LIST YOUR PG NOW <i className="fas fa-house-circle-plus"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Smart Matching Section */}
+      <section className="smart-matching-sec" style={{ padding: '40px 24px', background: '#fff', borderTop: '1px solid var(--border)' }}>
+        <div className="section-header text-center" style={{ marginBottom: '28px' }}>
+          <span className="sub-title" style={{ fontSize: '11px', fontWeight: 700, color: 'var(--accent)', letterSpacing: '1px', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Technology</span>
+          <h2 style={{ fontSize: '22px', fontWeight: 800 }}>SMART COMPATIBILITY MATCHING</h2>
+          <p style={{ fontSize: '13px', color: 'var(--muted)', marginTop: '4px' }}>See how well each property matches your dynamic preferences instantly</p>
+        </div>
+        
+        <div style={{ maxWidth: '500px', margin: '0 auto' }} className="card match-demo-card">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px', borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
+            <div>
+              <h4 style={{ fontSize: '15px', fontWeight: 800, margin: 0 }}>Sri Sai Luxury PG</h4>
+              <span style={{ fontSize: '12px', color: 'var(--muted)' }}>Madhapur, Hyderabad</span>
+            </div>
+            <div style={{
+              width: '54px',
+              height: '54px',
+              borderRadius: '50%',
+              border: '3px solid var(--available)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 800,
+              color: 'var(--available)',
+              fontSize: '14px',
+              background: 'var(--accent-light)'
+            }}>
+              96%
+            </div>
+          </div>
+          
+          <div style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--fg)', marginBottom: '10px' }}>WHY THIS PG SUITS YOU:</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><i className="fas fa-circle-check" style={{ color: 'var(--available)' }}></i> Within your budget max limit</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><i className="fas fa-circle-check" style={{ color: 'var(--available)' }}></i> Preferred 3-sharing bunk available</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><i className="fas fa-circle-check" style={{ color: 'var(--available)' }}></i> Available on your selected move-in date</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><i className="fas fa-circle-check" style={{ color: 'var(--available)' }}></i> Free Wi-Fi access included</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><i className="fas fa-circle-check" style={{ color: 'var(--available)' }}></i> Elevator/Lift access equipped</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><i className="fas fa-circle-check" style={{ color: 'var(--available)' }}></i> Located within 1.2 KM of your office hub</div>
+          </div>
+        </div>
+      </section>
+
+      {/* Exact Bed Availability Section */}
+      <section className="bed-avail-visual-sec" style={{ padding: '40px 24px', background: 'var(--bg)', borderTop: '1px solid var(--border)' }}>
+        <div className="section-header text-center" style={{ marginBottom: '28px' }}>
+          <span className="sub-title" style={{ fontSize: '11px', fontWeight: 700, color: 'var(--accent)', letterSpacing: '1px', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Beds Map</span>
+          <h2 style={{ fontSize: '22px', fontWeight: 800 }}>EXACT BED AVAILABILITY GRAPHICS</h2>
+          <p style={{ fontSize: '13px', color: 'var(--muted)', marginTop: '4px' }}>See the exact bed available on room visual maps before reserving it</p>
+        </div>
+        
+        <div className="card" style={{ maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
+          <div className="room-layout-mock" style={{
+            background: '#EAE6DF',
+            borderRadius: '12px',
+            padding: '24px',
+            position: 'relative',
+            border: '2px dashed var(--border)',
+            minHeight: '220px',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '16px',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}>
+            {/* Mock Bed 1 */}
+            <div style={{
+              width: '110px',
+              height: '70px',
+              background: '#fff',
+              borderRadius: '8px',
+              border: '2px solid var(--available)',
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: 'var(--shadow)'
+            }}>
+              <span style={{ fontSize: '11px', fontWeight: 800 }}>Bed A1</span>
+              <span className="badge badge-green" style={{ fontSize: '9px', marginTop: '4px', padding: '2px 6px' }}>🟢 AVAILABLE</span>
+            </div>
+            
+            {/* Mock Bed 2 */}
+            <div style={{
+              width: '110px',
+              height: '70px',
+              background: '#F1F1F1',
+              borderRadius: '8px',
+              border: '2px solid var(--occupied)',
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: 0.8
+            }}>
+              <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--muted)' }}>Bed A2</span>
+              <span className="badge badge-red" style={{ fontSize: '9px', marginTop: '4px', padding: '2px 6px' }}>🔴 OCCUPIED</span>
+            </div>
+
+            {/* Mock Bed 3 */}
+            <div style={{
+              width: '110px',
+              height: '70px',
+              background: '#fff',
+              borderRadius: '8px',
+              border: '2px solid var(--reserved)',
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: 'var(--shadow)'
+            }}>
+              <span style={{ fontSize: '11px', fontWeight: 800 }}>Bed B1</span>
+              <span className="badge badge-amber" style={{ fontSize: '9px', marginTop: '4px', padding: '2px 6px' }}>🟡 RESERVED</span>
+            </div>
+
+            {/* Mock Bed 4 */}
+            <div style={{
+              width: '110px',
+              height: '70px',
+              background: '#fff',
+              borderRadius: '8px',
+              border: '2px solid var(--available)',
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: 'var(--shadow)'
+            }}>
+              <span style={{ fontSize: '11px', fontWeight: 800 }}>Bed B2</span>
+              <span className="badge badge-green" style={{ fontSize: '9px', marginTop: '4px', padding: '2px 6px' }}>🟢 AVAILABLE</span>
+            </div>
+          </div>
+          <p style={{ textAlign: 'center', fontSize: '12.5px', color: 'var(--muted)', marginTop: '14px', marginBottom: 0 }}>
+            Interactive hotspot overlays render directly on verified room layouts in the PG Details screen.
+          </p>
+        </div>
+      </section>
+
+      {/* Help & Support Section */}
+      <section id="support-sec" style={{ padding: '40px 24px', background: '#fff', borderTop: '1px solid var(--border)' }}>
+        <div className="section-header text-center" style={{ marginBottom: '28px' }}>
+          <span className="sub-title" style={{ fontSize: '11px', fontWeight: 700, color: 'var(--accent)', letterSpacing: '1px', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Support</span>
+          <h2 style={{ fontSize: '22px', fontWeight: 800 }}>NEED HELP?</h2>
+          <p style={{ fontSize: '13px', color: 'var(--muted)', marginTop: '4px' }}>We're here to help you find the right stay or list your property</p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px', maxWidth: '800px', margin: '0 auto 30px' }} className="support-grid">
+          <div className="card" style={{ padding: '18px' }}>
+            <h4 style={{ fontSize: '14.5px', fontWeight: 700, marginBottom: '6px' }}><i className="fas fa-circle-question" style={{ color: 'var(--accent)', marginRight: '6px' }}></i> For Users &amp; Guests</h4>
+            <p style={{ fontSize: '12.5px', color: 'var(--muted)', marginBottom: '12px' }}>Have questions about booking requests, deposits, refunds, or sharing configurations?</p>
+            <a href="mailto:support@smartpg.com" className="btn-secondary" style={{ display: 'inline-flex', textDecoration: 'none', alignItems: 'center', gap: '6px', fontSize: '12.5px', width: 'auto', padding: '8px 16px' }}>
+              <i className="fas fa-envelope"></i> Contact User Support
+            </a>
+          </div>
+          
+          <div className="card" style={{ padding: '18px' }}>
+            <h4 style={{ fontSize: '14.5px', fontWeight: 700, marginBottom: '6px' }}><i className="fas fa-screwdriver-wrench" style={{ color: 'var(--accent)', marginRight: '6px' }}></i> For PG Owners</h4>
+            <p style={{ fontSize: '12.5px', color: 'var(--muted)', marginBottom: '12px' }}>Need assistance with list registers, layout mapping coordinates, or occupancy logs?</p>
+            <a href="mailto:owners@smartpg.com" className="btn-secondary" style={{ display: 'inline-flex', textDecoration: 'none', alignItems: 'center', gap: '6px', fontSize: '12.5px', width: 'auto', padding: '8px 16px' }}>
+              <i className="fas fa-envelope-open-text"></i> Contact Owner Support
+            </a>
+          </div>
+        </div>
+
+        {/* Suggestion Form */}
+        <div className="card" style={{ maxWidth: '600px', margin: '0 auto', padding: '24px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 800, marginBottom: '6px', textAlign: 'center' }}>Have a question or suggestion?</h3>
+          <p style={{ fontSize: '12.5px', color: 'var(--muted)', textAlign: 'center', marginBottom: '20px' }}>Fill out the form below and our team will get back to you shortly.</p>
+          
+          {querySubmitted ? (
+            <div style={{
+              background: 'var(--accent-light)',
+              color: 'var(--accent-dark)',
+              borderRadius: '8px',
+              padding: '16px',
+              textAlign: 'center',
+              fontSize: '13.5px',
+              fontWeight: 600
+            }}>
+              <i className="fas fa-circle-check" style={{ marginRight: '6px' }}></i> Message sent successfully! Thank you for your feedback.
+            </div>
+          ) : (
+            <form onSubmit={handleQuerySubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <div className="input-g" style={{ flex: 1, margin: 0 }}>
+                  <label style={{ fontSize: '11px', fontWeight: 600 }}>Your Name *</label>
+                  <input type="text" placeholder="e.g. Rahul Sharma" value={queryName} onChange={(e) => setQueryName(e.target.value)} required />
+                </div>
+                <div className="input-g" style={{ flex: 1, margin: 0 }}>
+                  <label style={{ fontSize: '11px', fontWeight: 600 }}>Your Email *</label>
+                  <input type="email" placeholder="rahul@example.com" value={queryEmail} onChange={(e) => setQueryEmail(e.target.value)} required />
+                </div>
+              </div>
+              
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <div className="input-g" style={{ flex: 1, margin: 0 }}>
+                  <label style={{ fontSize: '11px', fontWeight: 600 }}>User Type *</label>
+                  <select value={queryUserType} onChange={(e) => setQueryUserType(e.target.value)}>
+                    <option value="User">User / Guest Student</option>
+                    <option value="PG Owner">PG Owner / Landlord</option>
+                  </select>
+                </div>
+                <div className="input-g" style={{ flex: 1, margin: 0 }}>
+                  <label style={{ fontSize: '11px', fontWeight: 600 }}>Subject</label>
+                  <input type="text" placeholder="e.g. Feature Suggestion" value={querySubject} onChange={(e) => setQuerySubject(e.target.value)} />
+                </div>
+              </div>
+
+              <div className="input-g" style={{ margin: 0 }}>
+                <label style={{ fontSize: '11px', fontWeight: 600 }}>Message *</label>
+                <textarea 
+                  placeholder="Type your message or query here..." 
+                  value={queryMessage} 
+                  onChange={(e) => setQueryMessage(e.target.value)} 
+                  required 
+                  style={{
+                    width: '100%',
+                    minHeight: '80px',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    border: '1.5px solid var(--border)',
+                    background: 'var(--bg)',
+                    fontSize: '13px',
+                    outline: 'none',
+                    fontFamily: 'inherit'
+                  }}
+                />
+              </div>
+
+              <button type="submit" className="btn-primary" style={{ marginTop: '6px' }}>
+                SEND MESSAGE <i className="fas fa-paper-plane"></i>
+              </button>
+            </form>
+          )}
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="footer-sec" style={{ background: '#0F172A', color: '#CBD5E1', padding: '40px 24px 20px', borderTop: '2px solid #1E293B', fontSize: '12px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '28px', maxWidth: '1000px', margin: '0 auto 30px' }} className="footer-grid">
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#fff', fontSize: '16px', fontWeight: 800, marginBottom: '10px' }}>
+              <i className="fas fa-building" style={{ color: 'var(--accent)' }}></i> Smart PG Finder
+            </div>
+            <p style={{ lineHeight: 1.6 }}>Find premium PG and co-living accommodations that match your requirements. See real-time bed layouts before reserving.</p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }} className="footer-links-wrap">
+            <div>
+              <h4 style={{ color: '#fff', fontWeight: 700, marginBottom: '10px', fontSize: '13px' }}>Quick Links</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span style={{ cursor: 'pointer' }} onClick={() => onNavigateToSearch(null)}>Find PG</span>
+                <span style={{ cursor: 'pointer' }} onClick={() => onNavigateToLogin('owner')}>For Owners</span>
+                <span style={{ cursor: 'pointer' }}>About Us</span>
+                <span style={{ cursor: 'pointer' }}>Contact Us</span>
+              </div>
+            </div>
+
+            <div>
+              <h4 style={{ color: '#fff', fontWeight: 700, marginBottom: '10px', fontSize: '13px' }}>Support Contact</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span>📧 support@smartpg.com</span>
+                <span>📧 owners@smartpg.com</span>
+                <span>📞 Phone: +91 99999 77777</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ borderTop: '1px solid #1E293B', paddingTop: '20px', textAlign: 'center', fontSize: '11px', display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '1000px', margin: '0 auto' }} className="footer-bottom">
+          <div>&copy; 2026 Smart PG Inc. All rights reserved.</div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '16px' }}>
+            <span style={{ cursor: 'pointer' }}>Privacy Policy</span>
+            <span>&bull;</span>
+            <span style={{ cursor: 'pointer' }}>Terms &amp; Conditions</span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}

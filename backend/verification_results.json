@@ -1,0 +1,386 @@
+[
+  {
+    "name": "Basic search (no filters)",
+    "url": "http://127.0.0.1:8000/api/pgs",
+    "total": 27,
+    "top_pgs": [
+      {
+        "name": "PVS DREAMS CO LIVING",
+        "gender": null,
+        "area": "KPHB Colony",
+        "city": "Hyderabad",
+        "score": 99,
+        "match_category": "Exact Match",
+        "is_exact": true,
+        "available_beds": 2,
+        "rooms_count": 2,
+        "rent": 11000.0,
+        "amenities": [
+          "Personal Locker",
+          "Parking",
+          "Laundry",
+          "TV",
+          "Security"
+        ]
+      },
+      {
+        "name": "Sri Syam Luxury Stay For Womens",
+        "gender": "Female",
+        "area": "Madhapur",
+        "city": "Hyderabad",
+        "score": 99,
+        "match_category": "Exact Match",
+        "is_exact": true,
+        "available_beds": 11,
+        "rooms_count": 7,
+        "rent": 6500.0,
+        "amenities": [
+          "Wi-Fi",
+          "CCTV",
+          "AC",
+          "Attached Bathroom",
+          "Washing Machine"
+        ]
+      },
+      {
+        "name": "BHANU GUEST HOUSE & CO-LIVING PG",
+        "gender": "Male",
+        "area": "Anjaiah Nagar-Gachibowli",
+        "city": "Hyderabad",
+        "score": 99,
+        "match_category": "Exact Match",
+        "is_exact": true,
+        "available_beds": 13,
+        "rooms_count": 6,
+        "rent": 6500.0,
+        "amenities": [
+          "Wi-Fi",
+          "CCTV",
+          "AC",
+          "Attached Bathroom",
+          "Washing Machine"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Gender Boys + Gachibowli",
+    "url": "http://127.0.0.1:8000/api/pgs?gender=Boys&location=Gachibowli",
+    "total": 17,
+    "top_pgs": [
+      {
+        "name": "BHANU GUEST HOUSE & CO-LIVING PG",
+        "gender": "Male",
+        "area": "Anjaiah Nagar-Gachibowli",
+        "city": "Hyderabad",
+        "score": 99,
+        "match_category": "Exact Match",
+        "is_exact": true,
+        "available_beds": 13,
+        "rooms_count": 6,
+        "rent": 6500.0,
+        "amenities": [
+          "Parking",
+          "Food",
+          "Geyser",
+          "Housekeeping",
+          "Security"
+        ]
+      },
+      {
+        "name": "Gachibowli WorkNest PG",
+        "gender": "Male",
+        "area": "Gachibowli",
+        "city": "Hyderabad",
+        "score": 99,
+        "match_category": "Exact Match",
+        "is_exact": true,
+        "available_beds": 8,
+        "rooms_count": 4,
+        "rent": 6500.0,
+        "amenities": [
+          "Wi-Fi",
+          "CCTV",
+          "AC",
+          "Attached Bathroom",
+          "Washing Machine"
+        ]
+      },
+      {
+        "name": "Gachibowli Comfort Homes",
+        "gender": "Male",
+        "area": "Gachibowli",
+        "city": "Hyderabad",
+        "score": 99,
+        "match_category": "Exact Match",
+        "is_exact": true,
+        "available_beds": 7,
+        "rooms_count": 4,
+        "rent": 6500.0,
+        "amenities": [
+          "Wi-Fi",
+          "Food (Homely Food, Daily Chapathi)",
+          "Hot Water",
+          "CCTV",
+          "AC"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Multiple filters: Boys + Gachibowli + Double Sharing + Budget 10000",
+    "url": "http://127.0.0.1:8000/api/pgs?gender=Boys&location=Gachibowli&sharing=2&max_price=10000",
+    "total": 17,
+    "top_pgs": [
+      {
+        "name": "Gachibowli WorkNest PG",
+        "gender": "Male",
+        "area": "Gachibowli",
+        "city": "Hyderabad",
+        "score": 99,
+        "match_category": "Exact Match",
+        "is_exact": true,
+        "available_beds": 1,
+        "rooms_count": 1,
+        "rent": 9500.0,
+        "amenities": [
+          "Wi-Fi",
+          "CCTV",
+          "AC",
+          "Attached Bathroom",
+          "Washing Machine"
+        ]
+      },
+      {
+        "name": "Gachibowli Comfort Homes",
+        "gender": "Male",
+        "area": "Gachibowli",
+        "city": "Hyderabad",
+        "score": 99,
+        "match_category": "Exact Match",
+        "is_exact": true,
+        "available_beds": 1,
+        "rooms_count": 1,
+        "rent": 10000.0,
+        "amenities": [
+          "Wi-Fi",
+          "Food (Homely Food, Daily Chapathi)",
+          "Hot Water",
+          "CCTV",
+          "AC"
+        ]
+      },
+      {
+        "name": "BHANU GUEST HOUSE & CO-LIVING PG",
+        "gender": "Male",
+        "area": "Anjaiah Nagar-Gachibowli",
+        "city": "Hyderabad",
+        "score": 99,
+        "match_category": "Best Match",
+        "is_exact": false,
+        "available_beds": 13,
+        "rooms_count": 6,
+        "rent": 6500.0,
+        "amenities": [
+          "Parking",
+          "Food",
+          "Geyser",
+          "Housekeeping",
+          "Security"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Complex amenities: Boys + Gachibowli + Wifi + AC + Power Backup + Gym + Food",
+    "url": "http://127.0.0.1:8000/api/pgs?gender=Boys&location=Gachibowli&amenities=Wifi%2CAC%2CPower+Backup%2CGym%2CFood",
+    "total": 17,
+    "top_pgs": [
+      {
+        "name": "BHANU GUEST HOUSE & CO-LIVING PG",
+        "gender": "Male",
+        "area": "Anjaiah Nagar-Gachibowli",
+        "city": "Hyderabad",
+        "score": 99,
+        "match_category": "Best Match",
+        "is_exact": false,
+        "available_beds": 13,
+        "rooms_count": 6,
+        "rent": 6500.0,
+        "amenities": [
+          "Parking",
+          "Food",
+          "Geyser",
+          "Housekeeping",
+          "Security"
+        ]
+      },
+      {
+        "name": "Gachibowli WorkNest PG",
+        "gender": "Male",
+        "area": "Gachibowli",
+        "city": "Hyderabad",
+        "score": 99,
+        "match_category": "Best Match",
+        "is_exact": false,
+        "available_beds": 8,
+        "rooms_count": 4,
+        "rent": 6500.0,
+        "amenities": [
+          "Wi-Fi",
+          "CCTV",
+          "AC",
+          "Attached Bathroom",
+          "Washing Machine"
+        ]
+      },
+      {
+        "name": "Gachibowli Comfort Homes",
+        "gender": "Male",
+        "area": "Gachibowli",
+        "city": "Hyderabad",
+        "score": 99,
+        "match_category": "Best Match",
+        "is_exact": false,
+        "available_beds": 7,
+        "rooms_count": 4,
+        "rent": 6500.0,
+        "amenities": [
+          "Wi-Fi",
+          "Food (Homely Food, Daily Chapathi)",
+          "Hot Water",
+          "CCTV",
+          "AC"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Girls + Madhapur + Single Sharing + AC + Cleaning",
+    "url": "http://127.0.0.1:8000/api/pgs?gender=Girls&location=Madhapur&sharing=1&amenities=AC%2CCleaning",
+    "total": 19,
+    "top_pgs": [
+      {
+        "name": "Sri Syam Luxury Stay For Womens",
+        "gender": "Female",
+        "area": "Madhapur",
+        "city": "Hyderabad",
+        "score": 99,
+        "match_category": "Best Match",
+        "is_exact": false,
+        "available_beds": 11,
+        "rooms_count": 7,
+        "rent": 6500.0,
+        "amenities": [
+          "Wi-Fi",
+          "CCTV",
+          "AC",
+          "Attached Bathroom",
+          "Washing Machine"
+        ]
+      },
+      {
+        "name": "Madhapur Metro Living",
+        "gender": "Unisex",
+        "area": "Madhapur",
+        "city": "Hyderabad",
+        "score": 99,
+        "match_category": "Best Match",
+        "is_exact": false,
+        "available_beds": 16,
+        "rooms_count": 8,
+        "rent": 6500.0,
+        "amenities": [
+          "Wi-Fi",
+          "Hot Water",
+          "CCTV",
+          "AC",
+          "Attached Bathroom"
+        ]
+      },
+      {
+        "name": "Madhapur All-Inclusive Living",
+        "gender": "Unisex",
+        "area": "Madhapur",
+        "city": "Hyderabad",
+        "score": 99,
+        "match_category": "Best Match",
+        "is_exact": false,
+        "available_beds": 12,
+        "rooms_count": 7,
+        "rent": 6500.0,
+        "amenities": [
+          "Laundry",
+          "Lift",
+          "Power Backup",
+          "Wi-Fi / Internet",
+          "Food"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Uncommon filter combo with multiple amenities",
+    "url": "http://127.0.0.1:8000/api/pgs?gender=Boys&location=Hitech+City&sharing=3&amenities=AC%2CPower+Backup%2CGeyser%2CTV%2CLaundry",
+    "total": 17,
+    "top_pgs": [
+      {
+        "name": "BHANU GUEST HOUSE & CO-LIVING PG",
+        "gender": "Male",
+        "area": "Anjaiah Nagar-Gachibowli",
+        "city": "Hyderabad",
+        "score": 99,
+        "match_category": "Best Match",
+        "is_exact": false,
+        "available_beds": 2,
+        "rooms_count": 1,
+        "rent": 7000.0,
+        "amenities": [
+          "Parking",
+          "Food",
+          "Geyser",
+          "Housekeeping",
+          "Security"
+        ]
+      },
+      {
+        "name": "The Legacy Co Live",
+        "gender": "Male",
+        "area": "Madhapur",
+        "city": "Hyderabad",
+        "score": 99,
+        "match_category": "Best Match",
+        "is_exact": false,
+        "available_beds": 3,
+        "rooms_count": 2,
+        "rent": 7000.0,
+        "amenities": [
+          "Wi-Fi",
+          "Hot Water",
+          "CCTV",
+          "AC",
+          "Parking"
+        ]
+      },
+      {
+        "name": "Gachibowli WorkNest PG",
+        "gender": "Male",
+        "area": "Gachibowli",
+        "city": "Hyderabad",
+        "score": 99,
+        "match_category": "Best Match",
+        "is_exact": false,
+        "available_beds": 2,
+        "rooms_count": 1,
+        "rent": 7500.0,
+        "amenities": [
+          "Wi-Fi",
+          "CCTV",
+          "AC",
+          "Attached Bathroom",
+          "Washing Machine"
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,18 @@
+import { getPGs } from "./api";
+
+export async function fetchPGs(params = {}) {
+  return await getPGs({
+    city: params.city || "",
+    area: params.area || "",
+    max_budget:
+      params.max_rent !== undefined &&
+      params.max_rent !== null &&
+      params.max_rent !== ""
+        ? params.max_rent
+        : "",
+    gender: params.gender_policy || "",
+    sharing: params.sharing || "",
+    page: params.page || 1,
+    page_size: params.page_size || 10,
+  });
+}

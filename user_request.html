@@ -1,0 +1,587 @@
+<USER_REQUEST>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>SMART PG</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+:root{
+  --bg:#F8F7F4;--fg:#1A1A1A;--muted:#71717A;--accent:#059669;--accent-light:#D1FAE5;
+  --accent-dark:#047857;--card:#FFFFFF;--border:#E4E4E0;--amber:#D97706;--amber-light:#FEF3C7;
+  --available:#059669;--available-bg:rgba(5,150,105,.14);
+  --occupied:#DC2626;--occupied-bg:rgba(220,38,38,.14);
+  --reserved:#D97706;--reserved-bg:rgba(217,119,6,.14);
+  --maintenance:#71717A;--maintenance-bg:rgba(113,113,122,.14);
+  --radius:16px;--radius-sm:12px;--shadow:0 1px 8px rgba(0,0,0,.05);--shadow-lg:0 8px 30px rgba(0,0,0,.1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Outfit',sans-serif;background:#DDD9D2;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:16px 0}
+.phone{width:410px;max-width:100%;height:880px;background:var(--bg);border-radius:44px;overflow:hidden;position:relative;box-shadow:0 24px 80px rgba(0,0,0,.18),0 0 0 1px rgba(0,0,0,.04)}
+.status-bar{height:50px;background:var(--bg);display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-size:13px;font-weight:600;flex-shrink:0}
+.scr-wrap{height:calc(100% - 50px - 74px);overflow-y:auto;overflow-x:hidden;scroll-behavior:smooth}
+.scr-wrap::-webkit-scrollbar{display:none}
+.screen{display:none;animation:fadeUp .28s ease}.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.bottom-nav{height:74px;background:var(--card);display:flex;align-items:center;justify-content:space-around;border-top:1px solid var(--border);position:absolute;bottom:0;left:0;right:0;border-radius:0 0 44px 44px;padding-bottom:10px;z-index:40}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:6px 14px;border-radius:14px;transition:.2s;color:var(--muted);font-size:10.5px;font-weight:500;user-select:none}
+.nav-item i{font-size:19px;transition:.2s}
+.nav-item.active{color:var(--accent)}
+.nav-item.active i{background:var(--accent-light);padding:5px 18px;border-radius:20px}
+.sub-screen{position:absolute;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:50;display:none;overflow-y:auto}
+.sub-screen.show{display:block;animation:slideIn .25s ease}
+.sub-screen::-webkit-scrollbar{display:none}
+@keyframes slideIn{from{transform:translateX(30px);opacity:0}to{transform:translateX(0);opacity:1}}
+.sub-hdr{position:sticky;top:0;background:var(--bg);padding:14px 20px;display:flex;align-items:center;gap:12px;z-index:10}
+.back-btn{width:38px;height:38px;border-radius:11px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;font-size:14px;color:var(--fg);flex-shrink:0}
+.back-btn:hover{background:var(--border)}
+.btn-primary{background:var(--accent);color:#fff;border:none;padding:15px 28px;border-radius:var(--radius-sm);font-family:'Outfit';font-size:15px;font-weight:600;cursor:pointer;width:100%;transition:.2s;letter-spacing:.3px}
+.btn-primary:hover{background:var(--accent-dark);transform:translateY(-1px)}
+.btn-primary:active{transform:scale(.98)}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;border:1px solid var(--border)}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:8px 14px;border-radius:100px;font-size:12.5px;font-weight:500;cursor:pointer;transition:.2s;border:1.5px solid var(--border);background:var(--card);color:var(--muted);white-space:nowrap;user-select:none}
+.chip.active,.chip:hover{border-color:var(--accent);background:var(--accent-light);color:var(--accent)}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:100px;font-size:10.5px;font-weight:600}
+.badge-green{background:var(--available-bg);color:var(--available)}
+.badge-red{background:var(--occupied-bg);color:var(--occupied)}
+.badge-amber{background:var(--reserved-bg);color:var(--reserved)}
+.badge-grey{background:var(--maintenance-bg);color:var(--maintenance)}
+.badge-blue{background:#EFF6FF;color:#2563EB}
+.input-g{margin-bottom:12px}
+.input-g label{display:block;font-size:12.5px;font-weight:600;color:var(--fg);margin-bottom:5px}
+.input-g input,.input-g select{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Outfit';font-size:13.5px;background:var(--card);color:var(--fg);outline:none;transition:.2s}
+.input-g input:focus,.input-g select:focus{border-color:var(--accent)}
+.bottom-sheet-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:100;display:none;animation:oIn .2s}
+.bottom-sheet-overlay.show{display:block}
+@keyframes oIn{from{opacity:0}to{opacity:1}}
+.bottom-sheet{position:absolute;bottom:0;left:0;right:0;background:var(--card);border-radius:26px 26px 0 0;z-index:101;transform:translateY(100%);transition:transform .32s cubic-bezier(.32,.72,0,1);max-height:78%;overflow-y:auto;padding:0 0 24px}
+.bottom-sheet.show{transform:translateY(0)}
+.bottom-sheet::-webkit-scrollbar{display:none}
+.bs-handle{width:40px;height:4px;background:var(--border);border-radius:4px;margin:12px auto 0}
+.bs-content{padding:8px 24px 24px}
+.toast{position:absolute;top:62px;left:50%;transform:translateX(-50%) translateY(-18px);background:var(--fg);color:#fff;padding:11px 22px;border-radius:12px;font-size:12.5px;font-weight:500;z-index:200;opacity:0;transition:.3s;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.bed-hotspot{position:absolute;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:.25s;border:2.5px solid;backdrop-filter:blur(1px);gap:1px}
+.bed-hotspot.available{background:rgba(5,150,105,.22);border-color:var(--available);animation:pGreen 2.2s infinite}
+.bed-hotspot.occupied{background:rgba(220,38,38,.16);border-color:var(--occupied);cursor:default}
+.bed-hotspot.reserved{background:rgba(217,119,6,.16);border-color:var(--reserved);cursor:default}
+.bed-hotspot.maintenance{background:rgba(113,113,122,.16);border-color:var(--maintenance);cursor:default}
+.bed-hotspot.available:hover{background:rgba(5,150,105,.38);transform:scale(1.04)}
+@keyframes pGreen{0%,100%{box-shadow:0 0 0 0 rgba(5,150,105,.35)}50%{box-shadow:0 0 0 10px rgba(5,150,105,0)}}
+.bed-hotspot .b-icon{font-size:18px}.bed-hotspot .b-lbl{font-size:9.5px;font-weight:700;text-shadow:0 1px 4px rgba(0,0,0,.35)}
+.hero{background:linear-gradient(145deg,#059669,#047857 50%,#065F46);padding:28px 24px 32px;border-radius:0 0 28px 28px;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.07) 1px,transparent 1px);background-size:18px 18px;pointer-events:none}
+.hero *{position:relative;z-index:1}
+.photo-gal{position:relative;width:100%;height:220px;overflow:hidden;background:#eee}
+.photo-gal img{width:100%;height:100%;object-fit:cover;transition:.4s}
+.photo-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:5px}
+.photo-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.45);transition:.3s}
+.photo-dot.active{background:#fff;width:18px;border-radius:3px}
+.stat-card{background:var(--card);border-radius:var(--radius-sm);padding:14px 8px;border:1px solid var(--border);text-align:center}
+.stat-num{font-size:26px;font-weight:800;line-height:1.1}.stat-lbl{font-size:10.5px;color:var(--muted);font-weight:500;margin-top:3px}
+.match-bar{height:5px;background:var(--border);border-radius:5px;overflow:hidden}
+.match-fill{height:100%;border-radius:5px;transition:width .7s ease}
+.h-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
+.h-scroll::-webkit-scrollbar{display:none}
+.compare-tbl{width:100%;border-collapse:collapse;font-size:11.5px}
+.compare-tbl th,.compare-tbl td{padding:10px 6px;text-align:center;border-bottom:1px solid var(--border)}
+.compare-tbl th{background:var(--bg);font-weight:600;position:sticky;top:0;font-size:11px}
+.compare-tbl td:first-child{text-align:left;font-weight:500;color:var(--muted);font-size:10.5px}
+.room-img-wrap{position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;border-radius:var(--radius-sm);background:#eee}
+.room-img-wrap img{width:100%;height:100%;object-fit:cover}
+.editor-hotspot{position:absolute;border:2.5px dashed var(--accent);background:rgba(5,150,105,.1);border-radius:6px;cursor:move;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent);user-select:none}
+.editor-hotspot .rh{position:absolute;width:14px;height:14px;background:var(--accent);border-radius:50%;bottom:-7px;right:-7px;cursor:se-resize}
+.compare-fab{position:absolute;bottom:90px;left:50%;transform:translateX(-50%);background:var(--fg);color:#fff;border:none;padding:13px 28px;border-radius:100px;font-family:'Outfit';font-size:14px;font-weight:600;cursor:pointer;z-index:45;box-shadow:0 4px 20px rgba(0,0,0,.25);transition:.2s;display:none}
+.compare-fab.show{display:flex;align-items:center;gap:8px}
+.compare-fab:hover{transform:translateX(-50%) translateY(-2px)}
+@media(max-width:420px){body{padding:0}.phone{width:100%;height:100vh;height:100dvh;border-radius:0;box-shadow:none}.bottom-nav{border-radius:0}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="phone" id="app">
+  <div class="status-bar"><span>9:41</span><span style="display:flex;gap:6px;font-size:12px"><i class="fas fa-signal"></i><i class="fas fa-wifi"></i><i class="fas fa-battery-full"></i></span></div>
+  <div class="scr-wrap" id="scr-wrap"></div>
+  <div class="sub-screen" id="sub-screen"></div>
+  <div class="bottom-sheet-overlay" id="sheet-ov"></div>
+  <div class="bottom-sheet" id="bsheet"><div class="bs-handle"></div><div class="bs-content" id="bs-content"></div></div>
+  <div class="toast" id="toast"></div>
+  <button class="compare-fab" id="compare-fab" data-action="open-compare"></button>
+  <nav class="bottom-nav" id="bnav">
+    <div class="nav-item active" data-tab="home"><i class="fas fa-home"></i><span>Home</span></div>
+    <div class="nav-item" data-tab="search"><i class="fas fa-search"></i><span>Search</span></div>
+    <div class="nav-item" data-tab="saved"><i class="fas fa-heart"></i><span>Saved</span></div>
+    <div class="nav-item" data-tab="bookings"><i class="fas fa-calendar-check"></i><span>Bookings</span></div>
+    <div class="nav-item" data-tab="profile"><i class="fas fa-user"></i><span>Profile</span></div>
+  </nav>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+const FI={wifi:'fa-wifi',food:'fa-utensils',hot_water:'fa-shower',laundry:'fa-shirt',ac:'fa-snowflake',parking:'fa-car',cctv:'fa-video',lift:'fa-arrow-up',power_backup:'fa-bolt',housekeeping:'fa-broom',study_table:'fa-book',locker:'fa-lock',attached_bath:'fa-bath'};
+const FL={wifi:'Wi-Fi',food:'Food',hot_water:'Hot Water',laundry:'Laundry',ac:'AC',parking:'Parking',cctv:'CCTV',lift:'Lift',power_backup:'Power Backup',housekeeping:'Housekeeping',study_table:'Study Table',locker:'Locker',attached_bath:'Attached Bath'};
+const STATUS_COLOR={available:'var(--available)',occupied:'var(--occupied)',reserved:'var(--reserved)',maintenance:'var(--maintenance)'};
+const STATUS_BG={available:'var(--available-bg)',occupied:'var(--occupied-bg)',reserved:'var(--reserved-bg)',maintenance:'var(--maintenance-bg)'};
+const STATUS_LABEL={available:'Available',occupied:'Occupied',reserved:'Reserved',maintenance:'Maintenance'};
+
+// ═══════════════════════════════════════════
+// DEMO DATA
+// ═══════════════════════════════════════════
+const USER={name:'Rahul Sharma',budgetMin:6000,budgetMax:10000,sharing:3,people:3,moveIn:'today',facilities:['wifi','food','hot_water','laundry','ac','lift'],workLocation:'Madhapur, Hyderabad',liftRequired:true};
+
+const PGs=[
+  {id:1,name:'Sri Sai Residency',location:'Madhapur, Hyderabad',distance:1.2,rent:8000,deposit:8000,sharing:3,gender:'Male',rating:4.3,reviewCount:28,verified:true,verifiedDetails:{owner:true,address:true,photos:true,lastUpdate:'15 min ago'},lift:true,floors:4,facilities:['wifi','food','hot_water','laundry','ac','parking','cctv','lift','power_backup'],foodCost:2000,electricityCost:500,maintenanceCost:300,images:['seed/srisai1/800/500','seed/srisai2/800/500','seed/srisai3/800/500'],
+    rooms:[
+      {id:101,name:'Room 203',floor:2,sharing:3,image:'seed/room203x/800/600',beds:[
+        {id:1,number:'Bed 1',status:'occupied',type:'Lower',window:true,locker:true,table:true,x:.04,y:.22,width:.27,height:.52},
+        {id:2,number:'Bed 2',status:'available',type:'Upper',window:false,locker:true,table:true,rent:8000,deposit:8000,x:.37,y:.04,width:.26,height:.46},
+        {id:3,number:'Bed 3',status:'occupied',type:'Lower',window:true,locker:false,table:true,x:.70,y:.22,width:.27,height:.52}
+      ]},
+      {id:102,name:'Room 205',floor:2,sharing:3,image:'seed/room205x/800/600',beds:[
+        {id:4,number:'Bed 1',status:'available',type:'Lower',window:true,locker:true,table:true,rent:8000,deposit:8000,x:.04,y:.22,width:.27,height:.52},
+        {id:5,number:'Bed 2',status:'available',type:'Upper',window:false,locker:true,table:true,rent:8000,deposit:8000,x:.37,y:.04,width:.26,height:.46},
+        {id:6,number:'Bed 3',status:'reserved',type:'Lower',window:true,locker:false,table:true,x:.70,y:.22,width:.27,height:.52}
+      ]}
+    ]
+  },
+  {id:2,name:'Green Valley PG',location:'Kondapur, Hyderabad',distance:2.1,rent:7500,deposit:7500,sharing:3,gender:'Male',rating:4.1,reviewCount:19,verified:true,verifiedDetails:{owner:true,address:true,photos:true,lastUpdate:'32 min ago'},lift:false,floors:3,facilities:['wifi','food','hot_water','ac','parking','cctv','power_backup','housekeeping'],foodCost:1800,electricityCost:450,maintenanceCost:250,images:['seed/green1/800/500','seed/green2/800/500'],
+    rooms:[
+      {id:201,name:'Room 101',floor:1,sharing:3,image:'seed/greenroom1/800/600',beds:[
+        {id:7,number:'Bed 1',status:'available',type:'Lower',window:true,locker:true,table:true,rent:7500,deposit:7500,x:.04,y:.22,width:.27,height:.52},
+        {id:8,number:'Bed 2',status:'available',type:'Upper',window:false,locker:true,table:true,rent:7500,deposit:7500,x:.37,y:.04,width:.26,height:.46},
+        {id:9,number:'Bed 3',status:'occupied',type:'Lower',window:true,locker:false,table:true,x:.70,y:.22,width:.27,height:.52}
+      ]},
+      {id:202,name:'Room 102',floor:1,sharing:2,image:'seed/greenroom2/800/600',beds:[
+        {id:10,number:'Bed 1',status:'occupied',type:'Lower',window:true,locker:true,table:true,x:.04,y:.22,width:.40,height:.52},
+        {id:11,number:'Bed 2',status:'available',type:'Upper',window:false,locker:true,table:true,rent:8500,deposit:8500,x:.52,y:.04,width:.44,height:.46}
+      ]}
+    ]
+  },
+  {id:3,name:'Sai Krishna PG',location:'Hitech City, Hyderabad',distance:3.5,rent:7000,deposit:7000,sharing:3,gender:'Male',rating:3.8,reviewCount:12,verified:false,verifiedDetails:{owner:true,address:false,photos:true,lastUpdate:'2 hours ago'},lift:true,floors:3,facilities:['wifi','food','hot_water','parking','cctv','lift','study_table'],foodCost:1500,electricityCost:400,maintenanceCost:200,images:['seed/saik1/800/500','seed/saik2/800/500'],
+    rooms:[
+      {id:301,name:'Room 302',floor:3,sharing:3,image:'seed/saikroom1/800/600',beds:[
+        {id:12,number:'Bed 1',status:'available',type:'Lower',window:true,locker:true,table:true,rent:7000,deposit:7000,x:.04,y:.22,width:.27,height:.52},
+        {id:13,number:'Bed 2',status:'occupied',type:'Upper',window:false,locker:true,table:true,x:.37,y:.04,width:.26,height:.46},
+        {id:14,number:'Bed 3',status:'maintenance',type:'Lower',window:true,locker:false,table:false,x:.70,y:.22,width:.27,height:.52}
+      ]}
+    ]
+  },
+  {id:4,name:'Tirumala PG',location:'Miyapur, Hyderabad',distance:5.8,rent:11500,deposit:10000,sharing:2,gender:'Male',rating:4.5,reviewCount:35,verified:true,verifiedDetails:{owner:true,address:true,photos:true,lastUpdate:'5 min ago'},lift:true,floors:5,facilities:['wifi','food','hot_water','laundry','ac','parking','cctv','lift','power_backup','housekeeping','attached_bath'],foodCost:2500,electricityCost:600,maintenanceCost:400,images:['seed/tiru1/800/500'],
+    rooms:[
+      {id:401,name:'Room 501',floor:5,sharing:2,image:'seed/tiruroom1/800/600',beds:[
+        {id:15,number:'Bed 1',status:'occupied',type:'Lower',window:true,locker:true,table:true,x:.04,y:.22,width:.42,height:.52},
+        {id:16,number:'Bed 2',status:'occupied',type:'Upper',window:false,locker:true,table:true,x:.52,y:.04,width:.44,height:.46}
+      ]}
+    ]
+  },
+  {id:5,name:'New Shanti PG',location:'Gachibowli, Hyderabad',distance:4.2,rent:6500,deposit:6500,sharing:4,gender:'Male',rating:3.5,reviewCount:8,verified:false,verifiedDetails:{owner:false,address:false,photos:false,lastUpdate:'1 day ago'},lift:false,floors:2,facilities:['wifi','food','parking'],foodCost:1200,electricityCost:350,maintenanceCost:150,images:['seed/shanti1/800/500'],
+    rooms:[
+      {id:501,name:'Room 104',floor:1,sharing:4,image:'seed/shantiroom1/800/600',beds:[
+        {id:17,number:'Bed 1',status:'available',type:'Lower',window:true,locker:false,table:false,rent:6500,deposit:6500,x:.02,y:.10,width:.22,height:.38},
+        {id:18,number:'Bed 2',status:'occupied',type:'Upper',window:false,locker:false,table:false,x:.02,y:.52,width:.22,height:.38},
+        {id:19,number:'Bed 3',status:'occupied',type:'Lower',window:true,locker:false,table:false,x:.76,y:.10,width:.22,height:.38},
+        {id:20,number:'Bed 4',status:'available',type:'Upper',window:false,locker:false,table:false,rent:6500,deposit:6500,x:.76,y:.52,width:.22,height:.38}
+      ]}
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let state={tab:'home',compareIds:new Set(),savedIds:new Set([1]),photoIdx:{}};
+
+// ═══════════════════════════════════════════
+// MATCHING ALGORITHM
+// ═══════════════════════════════════════════
+function calcMatch(pg,u){
+  let s=0,reasons=[],warnings=[];
+  // Budget 20%
+  if(pg.rent>=u.budgetMin&&pg.rent<=u.budgetMax){s+=20;reasons.push(`Within budget: Rs.${pg.rent.toLocaleString()}/month`);}
+  else if(pg.rent>u.budgetMax){const ov=pg.rent-u.budgetMax;s+=Math.max(0,20-(ov/u.budgetMax*50));warnings.push(`Over budget by Rs.${ov.toLocaleString()}`);}
+  else{s+=10;reasons.push(`Below your min budget`);}
+  // Sharing 15%
+  if(pg.sharing===u.sharing){s+=15;reasons.push(`${pg.sharing} Sharing matches`);}
+  else{warnings.push(`${pg.sharing} Sharing (you want ${u.sharing})`);}
+  // Bed availability 15%
+  const avail=pg.rooms.reduce((a,r)=>a+r.beds.filter(b=>b.status==='available').length,0);
+  const sameRoom=pg.rooms.filter(r=>r.beds.filter(b=>b.status==='available').length>=u.people);
+  if(sameRoom.length>0){s+=15;reasons.push(`${u.people} beds available in same room`);}
+  else if(avail>=u.people){s+=10;reasons.push(`${avail} beds available`);warnings.push('Not all in same room');}
+  else if(avail>0){s+=Math.round(avail/u.people*10);reasons.push(`${avail} bed(s) available`);warnings.push(`Need ${u.people}, only ${avail} available`);}
+  else{warnings.push('No beds available');}
+  // Move-in 15%
+  if(avail>0){s+=15;reasons.push('Available for move-in today');}
+  // Facilities 15%
+  let fMatch=0;
+  u.facilities.forEach(f=>{if(pg.facilities.includes(f)){fMatch++;reasons.push(`${FL[f]||f} available`);}else{warnings.push(`${FL[f]||f} not available`);}});
+  s+=Math.round(fMatch/u.facilities.length*15);
+  // Distance 10%
+  if(pg.distance<=1)s+=10;else if(pg.distance<=2)s+=8;else if(pg.distance<=3)s+=5;else if(pg.distance<=5)s+=3;else s+=1;
+  if(pg.distance<=3)reasons.push(`${pg.distance} km from your location`);
+  else warnings.push(`${pg.distance} km away`);
+  // Lift 5%
+  if(u.liftRequired){if(pg.lift){s+=5;reasons.push('Lift available');}else{warnings.push('No lift');}}
+  else s+=5;
+  // Other 5%
+  if(pg.verified){s+=3;reasons.push('Verified property');}
+  if(pg.rating>=4)s+=2;
+  return{score:Math.min(99,Math.max(5,Math.round(s))),reasons,warnings};
+}
+
+// Pre-calculate matches
+PGs.forEach(pg=>{pg.match=calcMatch(pg,USER);});
+PGs.sort((a,b)=>b.match.score-a.match.score);
+
+// ═══════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════
+const $=s=>document.querySelector(s);
+const $$=s=>document.querySelectorAll(s);
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+function openSheet(html){$('#bs-content').innerHTML=html;$('#sheet-ov').classList.add('show');$('#bsheet').classList.add('show');}
+function closeSheet(){$('#sheet-ov').classList.remove('show');$('#bsheet').classList.remove('show');}
+function pgImg(seed,w,h){return `https://picsum.photos/${seed}/${w}/${h}.jpg`;}
+function matchColor(s){return s>=85?'var(--available)':s>=70?'var(--amber)':s>=50?'#EA580C':'var(--occupied)';}
+function facilityChips(facs,size='11px'){
+  return facs.map(f=>`<span style="display:inline-flex;align-items:center;gap:4px;font-size:${size};color:var(--muted);font-weight:500"><i class="fas ${FI[f]||'fa-check'}" style="font-size:${size}"></i>${FL[f]||f}</span>`).join('');
+}
+function getBed(pg,bedId){for(const r of pg.rooms)for(const b of r.beds)if(b.id===parseInt(bedId))return{bed:b,room:r};return null;}
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+function setTab(tab){
+  state.tab=tab;
+  $$('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.tab===tab));
+  render();
+}
+function openSub(html){$('#sub-screen').innerHTML=html;$('#sub-screen').classList.add('show');}
+function closeSub(){$('#sub-screen').classList.remove('show');$('#sub-screen').innerHTML='';}
+function updateCompareFab(){
+  const fab=$('#compare-fab');
+  if(state.compareIds.size>=2){fab.classList.add('show');fab.innerHTML=`<i class="fas fa-columns"></i> Compare (${state.compareIds.size})`;}
+  else fab.classList.remove('show');
+}
+
+// ═══════════════════════════════════════════
+// RENDERERS
+// ═══════════════════════════════════════════
+function render(){
+  const w=$('#scr-wrap');
+  switch(state.tab){
+    case 'home':w.innerHTML=renderHome();break;
+    case 'search':w.innerHTML=renderSearch();break;
+    case 'saved':w.innerHTML=renderSaved();break;
+    case 'bookings':w.innerHTML=renderBookings();break;
+    case 'profile':w.innerHTML=renderProfile();break;
+  }
+  updateCompareFab();
+}
+
+function renderHome(){
+  const availPGs=PGs.filter(p=>p.rooms.some(r=>r.beds.some(b=>b.status==='available')));
+  const top3=PGs.slice(0,3);
+  return `
+  <div class="hero">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+      <div style="width:32px;height:32px;background:rgba(255,255,255,.18);border-radius:8px;display:flex;align-items:center;justify-content:center"><i class="fas fa-building" style="color:#fff;font-size:14px"></i></div>
+      <span style="color:rgba(255,255,255,.7);font-size:13px;font-weight:500">SMART PG</span>
+    </div>
+    <h1 style="color:#fff;font-size:26px;font-weight:800;line-height:1.2;margin-bottom:6px">Find your perfect room<br>&amp; bed in a new city</h1>
+    <p style="color:rgba(255,255,255,.65);font-size:13.5px;margin-bottom:18px">Real-time bed-level availability. See exactly which bed is free.</p>
+    <div style="background:rgba(255,255,255,.15);border-radius:14px;padding:13px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;backdrop-filter:blur(8px)" data-action="go-search">
+      <i class="fas fa-search" style="color:rgba(255,255,255,.6)"></i>
+      <span style="color:rgba(255,255,255,.55);font-size:13.5px">Search PGs by location...</span>
+    </div>
+  </div>
+  <div style="padding:20px 24px">
+    <!-- Available Today Banner -->
+    <div class="card" style="padding:18px 20px;margin-bottom:20px;cursor:pointer;border-left:4px solid var(--available)" data-action="available-today">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--available);animation:pGreen 2s infinite"></div>
+            <span style="font-size:14px;font-weight:700;color:var(--available)">AVAILABLE TODAY</span>
+          </div>
+          <p style="font-size:12.5px;color:var(--muted)">${availPGs.length} PGs with beds ready for immediate move-in</p>
+        </div>
+        <i class="fas fa-chevron-right" style="color:var(--muted);font-size:13px"></i>
+      </div>
+    </div>
+
+    <!-- Quick Filters -->
+    <div style="margin-bottom:22px">
+      <div class="h-scroll" style="gap:8px">
+        <span class="chip active" data-action="go-search" data-filter="today"><i class="fas fa-bolt" style="font-size:11px"></i> Available Today</span>
+        <span class="chip" data-action="go-search" data-filter="budget">Under Rs.8,000</span>
+        <span class="chip" data-action="go-search" data-filter="sharing">3 Sharing</span>
+        <span class="chip" data-action="go-search" data-filter="office">Near Office</span>
+        <span class="chip" data-action="go-search" data-filter="lift">Lift Required</span>
+      </div>
+    </div>
+
+    <!-- Recommended -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div>
+        <div style="font-size:17px;font-weight:700">Recommended for You</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">Based on your preferences</div>
+      </div>
+      <span style="font-size:12.5px;font-weight:600;color:var(--accent);cursor:pointer" data-action="go-search">See All</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      ${top3.map(pg=>renderPGCard(pg)).join('')}
+    </div>
+  </div>`;
+}
+
+function renderPGCard(pg){
+  const m=pg.match;
+  const availBeds=pg.rooms.reduce((a,r)=>a+r.beds.filter(b=>b.status==='available').length,0);
+  const hasToday=availBeds>0;
+  const checked=state.compareIds.has(pg.id);
+  const saved=state.savedIds.has(pg.id);
+  return `
+  <div class="card" style="padding:0">
+    <div style="display:flex">
+      <div style="width:110px;flex-shrink:0;position:relative">
+        <img src="${pgImg(pg.images[0],220,200)}" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius) 0 0 var(--radius)" alt="${pg.name}">
+        <div style="position:absolute;top:8px;left:8px;width:44px;height:44px;border-radius:50%;background:${matchColor(m.score)};display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:800;box-shadow:0 2px 8px rgba(0,0,0,.2)">${m.score}%</div>
+      </div>
+      <div style="flex:1;padding:14px 14px 14px 12px;display:flex;flex-direction:column;justify-content:space-between">
+        <div>
+          <div style="display:flex;align-items:start;justify-content:space-between;gap:6px">
+            <div style="font-size:14.5px;font-weight:700;line-height:1.2">${pg.name}</div>
+            <i class="fas ${saved?'fa-heart':'fa-heart'}" style="font-size:14px;color:${saved?'var(--occupied)':'var(--border)'};cursor:pointer;margin-top:2px" data-action="toggle-save" data-pg="${pg.id}"></i>
+          </div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:3px"><i class="fas fa-location-dot" style="font-size:10px"></i> ${pg.location} &middot; ${pg.distance} km</div>
+        </div>
+        <div>
+          <div style="display:flex;align-items:baseline;gap:6px;margin-top:8px">
+            <span style="font-size:17px;font-weight:800;color:var(--fg)">Rs.${pg.rent.toLocaleString()}</span>
+            <span style="font-size:11px;color:var(--muted)">/month</span>
+            <span style="font-size:11px;color:var(--muted);margin-left:auto">${pg.sharing} Sharing</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px">
+            ${hasToday?'<span class="badge badge-green">Available Today</span>':''}
+            ${availBeds>0?`<span class="badge badge-green">${availBeds} Bed${availBeds>1?'s':''}</span>`:'<span class="badge badge-red">No Beds</span>'}
+            ${pg.lift?'<span class="badge badge-green"><i class="fas fa-arrow-up" style="font-size:8px"></i> Lift</span>':''}
+            ${pg.verified?'<span class="badge badge-blue"><i class="fas fa-circle-check" style="font-size:8px"></i> Verified</span>':''}
+          </div>
+          <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap">${pg.facilities.slice(0,4).map(f=>`<span style="font-size:10.5px;color:var(--muted)"><i class="fas ${FI[f]||'fa-check'}" style="font-size:9px"></i> ${FL[f]||f}</span>`).join('')}</div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:0 14px 12px;display:flex;align-items:center;gap:8px">
+      <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);cursor:pointer">
+        <input type="checkbox" ${checked?'checked':''} style="accent-color:var(--accent)" data-action="toggle-compare" data-pg="${pg.id}"> Compare
+      </label>
+      <span style="flex:1"></span>
+      <button style="background:var(--accent);color:#fff;border:none;padding:9px 18px;border-radius:10px;font-family:'Outfit';font-size:12.5px;font-weight:600;cursor:pointer" data-action="view-pg" data-pg="${pg.id}">VIEW ROOM &amp; BED</button>
+    </div>
+  </div>`;
+}
+
+function renderSearch(){
+  return `
+  <div style="padding:20px 24px">
+    <div style="font-size:20px;font-weight:800;margin-bottom:4px">Find Your PG</div>
+    <div style="font-size:12.5px;color:var(--muted);margin-bottom:18px">Search with exact requirements</div>
+    <div class="input-g"><label>Location</label><input type="text" value="Hyderabad" id="s-loc"></div>
+    <div class="input-g"><label>Area</label><input type="text" value="Madhapur" id="s-area"></div>
+    <div style="display:flex;gap:10px">
+      <div class="input-g" style="flex:1"><label>Min Budget</label><input type="number" value="6000" id="s-bmin"></div>
+      <div class="input-g" style="flex:1"><label>Max Budget</label><input type="number" value="10000" id="s-bmax"></div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <div class="input-g" style="flex:1"><label>People</label><input type="number" value="3" id="s-people"></div>
+      <div class="input-g" style="flex:1"><label>Sharing</label><select id="s-sharing"><option value="1">1 Sharing</option><option value="2">2 Sharing</option><option value="3" selected>3 Sharing</option><option value="4">4 Sharing</option></select></div>
+    </div>
+    <div class="input-g"><label>Move-in Date</label><select id="s-movein"><option value="today" selected>Today</option><option value="week">This Week</option><option value="month">This Month</option><option value="flexible">Flexible</option></select></div>
+    <div style="margin-bottom:14px">
+      <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:8px">Facilities</label>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${['wifi','food','hot_water','laundry','ac','parking','lift','power_backup','cctv','housekeeping'].map(f=>`<span class="chip ${USER.facilities.includes(f)?'active':''}" data-fac="${f}" onclick="this.classList.toggle('active')"><i class="fas ${FI[f]}" style="font-size:11px"></i> ${FL[f]}</span>`).join('')}
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:6px">
+      <label style="display:flex;align-items:center;gap:5px;font-size:12.5px;cursor:pointer"><input type="checkbox" checked id="s-today" style="accent-color:var(--accent)"> Available Today Only</label>
+      <label style="display:flex;align-items:center;gap:5px;font-size:12.5px;cursor:pointer"><input type="checkbox" checked id="s-lift" style="accent-color:var(--accent)"> Lift Required</label>
+    </div>
+    <button class="btn-primary" style="margin-top:10px" data-action="do-search"><i class="fas fa-search" style="margin-right:6px"></i>SEARCH PGs</button>
+    <div id="search-results" style="margin-top:20px"></div>
+  </div>`;
+}
+
+function renderSaved(){
+  const saved=PGs.filter(p=>state.savedIds.has(p.id));
+  if(!saved.length)return `<div style="padding:80px 24px;text-align:center"><i class="fas fa-heart" style="font-size:40px;color:var(--border);margin-bottom:14px"></i><div style="font-size:16px;font-weight:600;margin-bottom:4px">No saved PGs</div><div style="font-size:13px;color:var(--muted)">Tap the heart icon on any PG to save it</div></div>`;
+  return `<div style="padding:20px 24px"><div style="font-size:20px;font-weight:800;margin-bottom:16px">Saved PGs</div><div style="display:flex;flex-direction:column;gap:14px">${saved.map(pg=>renderPGCard(pg)).join('')}</div></div>`;
+}
+
+function renderBookings(){
+  return `<div style="padding:80px 24px;text-align:center"><i class="fas fa-calendar-check" style="font-size:40px;color:var(--border);margin-bottom:14px"></i><div style="font-size:16px;font-weight:600;margin-bottom:4px">No bookings yet</div><div style="font-size:13px;color:var(--muted)">When you request a bed, it will appear here</div></div>`;
+}
+
+function renderProfile(){
+  return `
+  <div style="padding:20px 24px">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="width:72px;height:72px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:28px;font-weight:800;color:var(--accent)">RS</div>
+      <div style="font-size:18px;font-weight:700">${USER.name}</div>
+      <div style="font-size:12.5px;color:var(--muted)">Customer Account</div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      ${[['fa-sliders','My Preferences','edit-prefs'],['fa-bell','Notifications','toast|No new notifications'],['fa-circle-question','Help & Support','toast|Help center coming soon'],['fa-shield-halved','Privacy Policy','toast|Privacy policy coming soon'],['fa-right-from-bracket','Logout','toast|Logged out successfully']].map(([ic,lb,act])=>`
+      <div style="padding:15px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;border-bottom:1px solid var(--border);transition:.15s" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''" data-action="${act.includes('|')?act.split('|')[0]:act}" ${act.includes('|')?`data-msg="${act.split('|')[1]}"`:''}>
+        <i class="fas ${ic}" style="font-size:16px;color:var(--muted);width:22px;text-align:center"></i>
+        <span style="flex:1;font-size:14px;font-weight:500">${lb}</span>
+        <i class="fas fa-chevron-right" style="font-size:11px;color:var(--border)"></i>
+      </div>`).join('')}
+    </div>
+    <div class="card" style="margin-top:20px;padding:18px;cursor:pointer;border:2px dashed var(--accent);background:var(--accent-light)" data-action="show-owner">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:42px;height:42px;border-radius:12px;background:var(--accent);display:flex;align-items:center;justify-content:center"><i class="fas fa-building" style="color:#fff;font-size:16px"></i></div>
+        <div><div style="font-size:14px;font-weight:700;color:var(--accent)">Switch to Owner Mode</div><div style="font-size:11.5px;color:var(--muted)">Manage your PG properties</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════
+// SUB-SCREENS
+// ═══════════════════════════════════════════
+function renderPGDetail(pgId){
+  const pg=PGs.find(p=>p.id===parseInt(pgId));
+  if(!pg)return;
+  const m=pg.match;
+  const availBeds=pg.rooms.reduce((a,r)=>a+r.beds.filter(b=>b.status==='available').length,0);
+  const monthlyTotal=pg.rent+pg.foodCost+pg.electricityCost+pg.maintenanceCost;
+  const moveInTotal=monthlyTotal+pg.deposit;
+  const imgs=pg.images;
+  state.photoIdx[pg.id]=state.photoIdx[pg.id]||0;
+  const ci=state.photoIdx[pg.id];
+
+  openSub(`
+  <div class="sub-hdr">
+    <div class="back-btn" data-action="close-sub"><i class="fas fa-arrow-left"></i></div>
+    <span style="flex:1;font-size:15px;font-weight:600">PG Details</span>
+    <div class="back-btn" data-action="toggle-save" data-pg="${pg.id}"><i class="fas fa-heart" style="color:${state.savedIds.has(pg.id)?'var(--occupied)':'var(--muted)'}"></i></div>
+  </div>
+
+  <!-- Photo Gallery -->
+  <div class="photo-gal">
+    <img src="${pgImg(imgs[ci],800,500)}" alt="${pg.name}" id="pg-main-img">
+    <div class="photo-dots">${imgs.map((_,i)=>`<div class="photo-dot ${i===ci?'active':''}" data-action="pg-photo" data-pg="${pg.id}" data-idx="${i}"></div>`).join('')}</div>
+    ${pg.verified?'<div style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,.92);padding:5px 10px;border-radius:8px;font-size:11px;font-weight:600;color:#2563EB;display:flex;align-items:center;gap:4px"><i class="fas fa-circle-check"></i> Verified</div>':''}
+  </div>
+
+  <div style="padding:20px 24px">
+    <!-- Name & Info -->
+    <div style="display:flex;align-items:start;justify-content:space-between;gap:10px;margin-bottom:4px">
+      <h2 style="font-size:22px;font-weight:800;line-height:1.2">${pg.name}</h2>
+      <div style="width:50px;height:50px;border-radius:50%;background:${matchColor(m.score)};display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;flex-shrink:0;box-shadow:0 3px 12px ${matchColor(m.score)}44">${m.score}%</div>
+    </div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:10px"><i class="fas fa-location-dot" style="font-size:11px"></i> ${pg.location} &middot; ${pg.distance} km from your location</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px">
+      <span class="badge badge-green"><i class="fas fa-star" style="font-size:8px"></i> ${pg.rating} (${pg.reviewCount})</span>
+      <span class="badge" style="background:#F3F4F6;color:var(--muted)">${pg.gender}</span>
+      ${pg.lift?'<span class="badge badge-green"><i class="fas fa-arrow-up" style="font-size:8px"></i> Lift &middot; '+pg.floors+' Floors</span>':'<span class="badge badge-red">No Lift &middot; '+pg.floors+' Floors</span>'}
+      ${availBeds>0?'<span class="badge badge-green"><i class="fas fa-bolt" style="font-size:8px"></i> Available Today</span>':'<span class="badge badge-red">No Beds Available</span>'}
+    </div>
+
+    <!-- Cost Breakdown -->
+    <div class="card" style="padding:18px;margin-bottom:18px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px"><i class="fas fa-receipt" style="color:var(--accent)"></i> Cost Breakdown</div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:13px">
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Monthly Rent</span><span style="font-weight:600">Rs.${pg.rent.toLocaleString()}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Food</span><span style="font-weight:600">Rs.${pg.foodCost.toLocaleString()}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Electricity</span><span style="font-weight:600">Rs.${pg.electricityCost.toLocaleString()}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Maintenance</span><span style="font-weight:600">Rs.${pg.maintenanceCost.toLocaleString()}</span></div>
+        <div style="border-top:1.5px solid var(--border);padding-top:10px;display:flex;justify-content:space-between"><span style="font-weight:600">Estimated Monthly</span><span style="font-weight:800;font-size:16px;color:var(--accent)">Rs.${monthlyTotal.toLocaleString()}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Security Deposit (one-time)</span><span style="font-weight:600">Rs.${pg.deposit.toLocaleString()}</span></div>
+        <div style="border-top:1.5px solid var(--border);padding-top:10px;display:flex;justify-content:space-between"><span style="font-weight:700">Initial Move-in Cost</span><span style="font-weight:800;font-size:17px;color:var(--amber)">Rs.${moveInTotal.toLocaleString()}</span></div>
+      </div>
+    </div>
+
+    <!-- Facilities -->
+    <div class="card" style="padding:18px;margin-bottom:18px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px"><i class="fas fa-list-check" style="color:var(--accent)"></i> Facilities</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        ${Object.keys(FL).map(f=>pg.facilities.includes(f)?`<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;background:var(--available-bg);color:var(--available);font-size:12px;font-weight:500"><i class="fas ${FI[f]}" style="font-size:11px"></i>${FL[f]}</span>`:`<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;background:var(--bg);color:var(--muted);font-size:12px;font-weight:400;opacity:.5"><i class="fas ${FI[f]}" style="font-size:11px"></i>${FL[f]}</span>`).join('')}
+      </div>
+    </div>
+
+    <!-- Match Explanation -->
+    <div class="card" style="padding:18px;margin-bottom:18px;border-left:4px solid ${matchColor(m.score)}">
+      <div style="font-size:14px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px"><i class="fas fa-trophy" style="color:${matchColor(m.score)}"></i> ${m.score}% Match</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Why this PG suits your requirements</div>
+      <div class="match-bar" style="margin-bottom:14px"><div class="match-fill" style="width:${m.score}%;background:${matchColor(m.score)}"></div></div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        ${m.reasons.map(r=>`<div style="display:flex;align-items:start;gap:8px;font-size:12.5px"><i class="fas fa-circle-check" style="color:var(--available);margin-top:2px;font-size:12px"></i><span>${r}</span></div>`).join('')}
+        ${m.warnings.map(w=>`<div style="display:flex;align-items:start;gap:8px;font-size:12.5px;color:var(--amber)"><i class="fas fa-triangle-exclamation" style="margin-top:2px;font-size:12px"></i><span>${w}</span></div>`).join('')}
+      </div>
+    </div>
+
+    <!-- Rooms with Bed Hotspots -->
+    <div style="font-size:16px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px"><i class="fas fa-bed" style="color:var(--accent)"></i> Rooms &amp; Bed Availability</div>
+    <div style="display:flex;flex-direction:column;gap:18px;margin-bottom:20px">
+      ${pg.rooms.map(room=>{
+        const availCount=room.beds.filter(b=>b.status==='available').length;
+        return `
+        <div class="card" style="padding:0;overflow:visible">
+          <div style="padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-size:14px;font-weight:700">${room.name}</div>
+              <div style="font-size:11.5px;color:var(--muted)">${room.sharing} Sharing &middot; Floor ${room.floor} ${pg.lift?'&middot; Lift access':''}</div>
+            </div>
+            <div style="display:flex;gap:4px">
+              ${room.beds.map(b=>`<span class="badge badge-${b.status==='available'?'green':b.status==='reserved'?'amber':b.status==='maintenance'?'grey':'red'}" style="font-size:9.5px">${b.status==='available'?'Avail':b.status==='reserved'?'Resrv':b.status==='maintenance'?'Maint':'Occpd'}</span>`).join('')}
+            </div>
+          </div>
+          <div class="room-img-wrap" style="margin:0 12px;border-radius:var(--radius-sm)">
+            <img src="${pgImg(room.image,800,600)}" alt="${room.name}" style="filter:brightness(.95)">
+            ${room.beds.map(b=>`
+            <div class="bed-hotspot ${b.status}" style="left:${b.x*100}%;top:${b.y*100}%;width:${b.width*100}%;height:${b.height*100}%" ${b.status==='available'?`data-action="select-bed" data-pg="${pg.id}" data-bed="${b.id}"`:''}>
+              <i class="fas ${b.status==='available'?'fa-bed':b.status==='reserved'?'fa-clock':b.status==='maintenance'?'fa-wrench':'fa-user'} b-icon" style="color:#fff"></i>
+              <span class="b-lbl" style="color:#fff">${b.number}</span>
+            </div>`).join('')}
+          </div>
+          <div style="padding:10px 16px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            ${room.beds.map(b=>`<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500"><span style="width:8px;height:8px;border-radius:2px;background:${STATUS_COLOR[b.status]}"></span>${b.number}: ${STATUS_LABEL[b.status]}</span>`).join('<span style="color:var(--border)">|</span>')}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <!-- Verification Details -->
+    <div class="card" style="padding:18px;margin-bottom:24px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px"><i class="fas fa-shield-halved" style="color:${pg.verified?'var(--accent)':'var(--amber)'}"></i> Verification Status</div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:12.5px">
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Owner Verified</span><span style="font-weight:600;color:${pg.verifiedDetails.owner?'var(--available)':'var(--occupied)'}">${pg.verifiedDetails.owner?'Yes':'No'}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Address Verified</span><span style="font-weight:600;color:${pg.verifiedDetails.address?'var(--available)':'var(--occupied)'}">${pg.verifiedDetails.address?'Yes':'No'}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Photos Verified</span><span style="font-weight:600;color:${pg.verifiedDetails.photos?'var(--available)':'var(--occupied)'}">${pg.verifiedDetails.photos?'Yes':'No'}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Last Availability Update</span><span style="font-weight:600">${pg.verifiedDetails.lastUpdate}</span></div>
+      </div>
+    </div>
+  </div>`);
+}
+
+function renderComparison(){
+  const ids=[...state.compareIds].slice(0,3);
+  const pgs=ids.map(id=>PGs.find(p=>p.id===id)).filter(Boolean);
+  if(pgs.length<2){toast('Select at least 2 PGs to compare');return;}
+  const rows=[
+    ['Monthly Rent',...pgs.map(p=>`Rs.${p.rent.toLocaleString()}`)],
+    ['Security Deposit',...pgs.map(p=>`Rs.${p.deposit.toLocaleString()}`)],
+    ['Est. Monthly Cost',...pgs.map(p=>`Rs.${(p.rent+p.foodCost+p.electricityCost+p.maintenanceCost).toLocaleString()}`)],
+    ['Move-in Cost',...pgs.map(p=>`Rs.${(p.rent+p.foodCost+p.electricityCost+p.maintenanceCost+p.deposit).toLocaleString()}`)],
+    ['Sharing',...pgs.map(p=>`${p.sharing} Sharing`)],
+    ['Available Beds',...pgs.map(p=>{const a=p.rooms.reduce((s,r)=>s+r.beds.filter(b=>b.status==='available').length,0);return `<span style="co
+<truncated 22622 bytes>
+
+NOTE: The output was truncated because it was too long. Use a more targeted query or a smaller range to get the information you need.

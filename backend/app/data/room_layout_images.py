@@ -1,0 +1,40 @@
+ROOM_LAYOUT_IMAGES = {
+    1: [
+        "https://i.pinimg.com/736x/b8/dd/bb/b8ddbb720728d4a64e6c098dc78aca07.jpg",
+        "https://i.pinimg.com/736x/90/67/17/906717479c007a88d64ece1b2b220dba.jpg",
+        "https://i.pinimg.com/736x/a3/22/4d/a3224dfacf3e8208b2d78859d5d46f43.jpg",
+        "https://i.pinimg.com/736x/11/f7/0a/11f70abf5fb52adbfd82f851c2090fc6.jpg",
+        "https://i.pinimg.com/1200x/c0/66/89/c06689a27b403352a909c44733d2c8a6.jpg",
+        "https://i.pinimg.com/1200x/16/f2/b2/16f2b24b20653b73bb224ee8c36bfcec.jpg",
+    ],
+    2: [
+        "https://i.pinimg.com/1200x/85/b2/72/85b2724df9c5e1c8ec7140b973126724.jpg",
+        "https://i.pinimg.com/1200x/93/1a/f9/931af9404efa7dec5b857d10479c1a66.jpg",
+        "https://i.pinimg.com/1200x/67/3f/7e/673f7e54ac1b1ad621df7bd3c2d1bf22.jpg",
+        "https://i.pinimg.com/736x/40/e1/7c/40e17c327eb395dc0f0dfdb6511ffa37.jpg",
+        "https://i.pinimg.com/736x/55/6a/2a/556a2a1425fa583f83e5a32c8a458dc4.jpg",
+        "https://i.pinimg.com/1200x/e5/b0/4f/e5b04fe838e4aa6adafc80f59b0491f5.jpg",
+        "https://i.pinimg.com/1200x/d3/ad/45/d3ad45c040fc7f3711134d26ec82d4f4.jpg",
+    ],
+    3: [
+        "https://i.pinimg.com/736x/4f/d6/68/4fd668eccd2ff8039636f6447cc1cd45.jpg",
+        "https://i.pinimg.com/1200x/c0/ba/ab/c0baab5880c3995b92a6fbe726823c9e.jpg",
+        "https://i.pinimg.com/736x/68/8c/38/688c3808674d31688a170116c08334d0.jpg",
+        "https://i.pinimg.com/736x/89/bb/02/89bb02b14fbdd435e7199bd6f23c7796.jpg",
+        "https://i.pinimg.com/736x/e3/3e/47/e33e478557008427fbe79d47f707679d.jpg",
+        "https://i.pinimg.com/736x/45/e8/b6/45e8b6ce74b809036d1c1df912c1c91f.jpg",
+        "https://i.pinimg.com/1200x/eb/56/8a/eb568ae6aec3445c4408f76953253206.jpg",
+    ],
+    4: [
+        "https://i.pinimg.com/1200x/58/10/b3/5810b3bc845c6a04ff2e9cf904db6972.jpg",
+        "https://i.pinimg.com/736x/aa/be/cc/aabecc02ad2b03f7ca534aa4c95b038f.jpg",
+        "https://i.pinimg.com/1200x/60/56/be/6056be407732f723aef475ad5310d149.jpg",
+        "https://i.pinimg.com/1200x/d3/c3/5d/d3c35d8b1c933821efe2aa00bcd69382.jpg",
+        "https://i.pinimg.com/1200x/01/a4/b3/01a4b3d2d3f17bc93b46d0ba0efa4cca.jpg",
+    ],
+    5: [
+        "https://i.pinimg.com/1200x/a6/84/bf/a684bf962467380ae2a75ba5064032ba.jpg",
+        "https://i.pinimg.com/1200x/2b/a9/2c/2ba92c4885a5e5288645e01b5cd68b41.jpg",
+        "https://z-cdn-media.chatglm.cn/files/efe972bb-e504-4e04-bf38-6b7d3bfd787e.png?auth_key=1887246960-8c537ca97d3f492b89bfcc1a1f111b45-0-23a568271c1578a50f180492be0389ef",
+    ],
+}

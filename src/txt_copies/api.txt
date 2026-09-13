@@ -1,0 +1,38 @@
+const API_BASE_URL = "http://127.0.0.1:8000";
+
+export async function getPGs({
+    city = "",
+    area = "",
+    min_budget = "",
+    max_budget = "",
+    gender = "",
+    amenity = "",
+    sharing = "",
+    page = 1,
+    page_size = 10,
+} = {}) {
+    const params = new URLSearchParams();
+
+    if (city) params.append("city", city);
+    if (area) params.append("area", area);
+    if (min_budget !== "") params.append("min_budget", min_budget);
+    if (max_budget !== "") params.append("max_budget", max_budget);
+    if (gender) params.append("gender", gender);
+    if (amenity) params.append("amenity", amenity);
+    if (sharing) params.append("sharing", sharing);
+
+    params.append("page", page);
+    params.append("page_size", page_size);
+
+    const response = await fetch(
+        `${API_BASE_URL}/api/pgs?${params.toString()}`
+    );
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch PGs: ${response.status}`);
+    }
+
+    return await response.json();
+}
+
+export { API_BASE_URL };
