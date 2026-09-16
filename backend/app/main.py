@@ -1,3 +1,5 @@
+import os
+
 # pyrefly: ignore [missing-import]
 from fastapi import FastAPI
 # pyrefly: ignore [missing-import]
@@ -9,17 +11,25 @@ from app.routers import pg, auth, favorites, bookings, reviews, notifications, t
 
 app = FastAPI(title="Smart PG Backend", version="1.0.0")
 
-# CORS
+# CORS Configuration
+default_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+    "http://localhost:8080",
+    "http://localhost",
+]
+custom_origins = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
+frontend_url = os.getenv("FRONTEND_URL", "").strip()
+if frontend_url:
+    custom_origins.append(frontend_url)
+
+allowed_origins = list(set(default_origins + custom_origins))
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:5174",
-        "http://127.0.0.1:5174",
-        "http://localhost:8080",
-        "http://localhost",
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
