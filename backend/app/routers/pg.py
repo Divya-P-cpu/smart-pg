@@ -60,26 +60,30 @@ def load_recommendation_reasons(db: Session, user_id: Optional[str], pg_ids: lis
     if not user_id or not pg_ids:
         return {}
 
-    rows = db.execute(
-        text(
-            """
-            SELECT pg_id, reason_text
-            FROM recommendation_reasons
-            WHERE user_id = :user_id
-              AND pg_id IN :pg_ids
-              AND reason_text IS NOT NULL
-            ORDER BY generated_at ASC, recommendation_id ASC
-            """
-        ).bindparams(bindparam("pg_ids", expanding=True)),
-        {"user_id": user_id, "pg_ids": pg_ids},
-    ).mappings().all()
+    try:
+        rows = db.execute(
+            text(
+                """
+                SELECT pg_id, reason_text
+                FROM recommendation_reasons
+                WHERE user_id = :user_id
+                  AND pg_id IN :pg_ids
+                  AND reason_text IS NOT NULL
+                ORDER BY generated_at ASC, recommendation_id ASC
+                """
+            ).bindparams(bindparam("pg_ids", expanding=True)),
+            {"user_id": user_id, "pg_ids": pg_ids},
+        ).mappings().all()
 
-    reasons_by_pg: dict[str, list[str]] = {}
-    for row in rows:
-        reasons = reasons_by_pg.setdefault(row["pg_id"], [])
-        if len(reasons) < 4:
-            reasons.append(row["reason_text"])
-    return reasons_by_pg
+        reasons_by_pg: dict[str, list[str]] = {}
+        for row in rows:
+            reasons = reasons_by_pg.setdefault(row["pg_id"], [])
+            if len(reasons) < 4:
+                reasons.append(row["reason_text"])
+        return reasons_by_pg
+    except Exception:
+        # Table may not exist or query may fail; safely fallback to empty reasons
+        return {}
 
 class PgCreate(BaseModel):
     pg_name: str
