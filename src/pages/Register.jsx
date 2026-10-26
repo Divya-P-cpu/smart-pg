@@ -18,7 +18,7 @@ export default function Register() {
       if (user.role === "owner") {
         navigate("/owner");
       } else {
-        navigate("/explore");
+        navigate("/dashboard");
       }
     }
   }, [user, navigate]);
@@ -35,7 +35,9 @@ export default function Register() {
     } catch (err) {
       console.error(err);
       const detail = err.response?.data?.detail;
-      setError(detail || (err.response ? "Unable to create the account. Please check your details and try again." : "Cannot reach the server. Please make sure the backend is running."));
+      const msg = detail || (err.response ? "Unable to create the account. Please check your details and try again." : "Cannot reach the server. Please check your connection or try again in a few moments.");
+      setError(msg);
+      throw err;
     }
   };
 
@@ -61,9 +63,9 @@ export default function Register() {
         <div className="register-page-wrap">
           <OwnerRegister
             onRegisterSuccess={handleRegisterSuccess}
-            onBackToLogin={() => setRole(null)}
+            onBackToLogin={() => { setRole(null); setError(""); }}
+            serverError={error}
           />
-          {error && <div className="auth-error-banner glass-card" style={{ maxWidth: "400px", margin: "10px auto", padding: "10px", borderRadius: "8px", textAlign: "center", fontSize: "13px" }}><i className="fas fa-circle-exclamation"></i> {error}</div>}
         </div>
       </div>
     );
@@ -76,9 +78,9 @@ export default function Register() {
       <div className="register-page-wrap">
         <UserRegister
           onRegisterSuccess={handleRegisterSuccess}
-          onBackToLogin={() => setRole(null)}
+          onBackToLogin={() => { setRole(null); setError(""); }}
+          serverError={error}
         />
-        {error && <div className="auth-error-banner glass-card" style={{ maxWidth: "400px", margin: "10px auto", padding: "10px", borderRadius: "8px", textAlign: "center", fontSize: "13px" }}><i className="fas fa-circle-exclamation"></i> {error}</div>}
       </div>
     </div>
   );

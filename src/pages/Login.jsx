@@ -11,21 +11,33 @@ export default function Login() {
   const location = useLocation();
 
   const [role, setRole] = useState(location.state?.role || null);
+  const [initialEmail, setInitialEmail] = useState(location.state?.email || "");
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (user) {
-      if (user.role === "owner") {
+      const returnTo = location.state?.returnTo;
+      if (returnTo) {
+        navigate(returnTo);
+      } else if (user.role === "owner") {
         navigate("/owner");
       } else {
-        navigate("/explore");
+        navigate("/dashboard");
       }
     }
-  }, [user, navigate]);
+  }, [user, navigate, location.state]);
 
   const handleSelectRole = (selectedRole) => {
     setError("");
     setRole(selectedRole);
+  };
+
+  const handleSwitchRole = (newRole, emailToKeep = "") => {
+    setError("");
+    if (emailToKeep) {
+      setInitialEmail(emailToKeep);
+    }
+    setRole(newRole);
   };
 
   const handleLoginSuccess = async (loginData) => {
@@ -35,7 +47,9 @@ export default function Login() {
     } catch (err) {
       console.error(err);
       const detail = err.response?.data?.detail;
-      setError(detail || (err.response ? "Unable to sign in. Check the selected account type, email, and password." : "Cannot reach the server. Please make sure the backend is running."));
+      const msg = detail || (err.response ? "Unable to sign in. Check the selected account type, email, and password." : "Cannot reach the server. Please check your connection or try again in a few moments.");
+      setError(msg);
+      throw err;
     }
   };
 
@@ -60,10 +74,12 @@ export default function Login() {
         <div className="login-page-wrap">
           <OwnerLogin
             onLoginSuccess={handleLoginSuccess}
-            onBackToSelection={() => setRole(null)}
+            onBackToSelection={() => { setRole(null); setError(""); }}
             onGoToRegister={() => navigate("/register", { state: { role: "owner" } })}
+            onSwitchRole={handleSwitchRole}
+            initialEmail={initialEmail}
+            serverError={error}
           />
-          {error && <div className="auth-error-banner glass-card" style={{ maxWidth: "400px", margin: "10px auto", padding: "10px", borderRadius: "8px", textAlign: "center", fontSize: "13px" }}><i className="fas fa-circle-exclamation"></i> {error}</div>}
         </div>
       </div>
     );
@@ -76,10 +92,12 @@ export default function Login() {
       <div className="login-page-wrap">
         <UserLogin
           onLoginSuccess={handleLoginSuccess}
-          onBackToSelection={() => setRole(null)}
+          onBackToSelection={() => { setRole(null); setError(""); }}
           onGoToRegister={() => navigate("/register", { state: { role: "user" } })}
+          onSwitchRole={handleSwitchRole}
+          initialEmail={initialEmail}
+          serverError={error}
         />
-        {error && <div className="auth-error-banner glass-card" style={{ maxWidth: "400px", margin: "10px auto", padding: "10px", borderRadius: "8px", textAlign: "center", fontSize: "13px" }}><i className="fas fa-circle-exclamation"></i> {error}</div>}
       </div>
     </div>
   );

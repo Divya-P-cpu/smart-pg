@@ -60,6 +60,14 @@ export default function Navbar() {
         <span></span>
       </button>
 
+      {menuOpen && (
+        <div
+          className="nav-backdrop"
+          onClick={() => setMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       <nav className={`nav ${menuOpen ? "nav-open" : ""}`}>
         {navLinks.map((link) => (
           <NavLink
@@ -67,6 +75,7 @@ export default function Navbar() {
             to={link.to}
             end={link.to === "/"}
             className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+            onClick={() => setMenuOpen(false)}
           >
             {link.label}
           </NavLink>
@@ -76,14 +85,30 @@ export default function Navbar() {
             <span className="nav-user-chip">
               <i className="fas fa-circle-user"></i> {user.name || "Account"}
             </span>
-            <button onClick={logout} className="btn btn-secondary btn-sm-nav">
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+                logout();
+              }}
+              className="btn btn-secondary btn-sm-nav"
+            >
               Logout
             </button>
           </>
         ) : (
           <>
-            <Link to="/login" className="nav-link">Login</Link>
-            <Link to="/register" className="btn btn-primary btn-sm-nav">
+            <Link
+              to="/login"
+              className="nav-link"
+              onClick={() => setMenuOpen(false)}
+            >
+              Login
+            </Link>
+            <Link
+              to="/register"
+              className="btn btn-primary btn-sm-nav"
+              onClick={() => setMenuOpen(false)}
+            >
               Register <i className="fas fa-arrow-right"></i>
             </Link>
           </>

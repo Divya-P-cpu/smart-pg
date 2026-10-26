@@ -149,12 +149,12 @@ export default function Explore() {
     return list.slice(0, 8);
   }, [city, area]);
 
-  const loadPGs = async () => {
+  const loadPGs = async (overrideFilters = null) => {
     try {
       setLoading(true);
       setError("");
 
-      const requestedFilters = {
+      const requestedFilters = overrideFilters || {
         city: city || "",
         area: area || "",
         min_budget: minBudget !== "" ? Number(minBudget) : "",
@@ -203,7 +203,18 @@ export default function Explore() {
     setGender("");
     setSelectedAmenities([]);
     setSelectedAreaObj(null);
-    setPgs([]);
+    loadPGs({
+      city: city || "Hyderabad",
+      area: "",
+      min_budget: "",
+      max_budget: "",
+      gender: "",
+      sharing: "",
+      amenity: [],
+      beds_required: 1,
+      page: 1,
+      page_size: 100
+    });
   };
 
   const handleToggleSave = async (pgId) => {
@@ -355,8 +366,8 @@ export default function Explore() {
     lat: selectedAreaObj?.lat || 17.44,
     lng: selectedAreaObj?.lng || 78.39,
     budgetMin: minBudget !== "" ? Number(minBudget) : 0,
-    budgetMax: maxBudget !== "" ? Number(maxBudget) : 100000,
-    sharing: sharing !== "" ? Number(sharing) : 3,
+    budgetMax: maxBudget !== "" ? Number(maxBudget) : 0,
+    sharing: sharing !== "" ? Number(sharing) : 0,
     moveIn: moveInDate,
     facilities: selectedAmenities,
     people: Number(people) || 1,

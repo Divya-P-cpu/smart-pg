@@ -112,7 +112,9 @@ def extract_area_keywords(area_str: str) -> list[str]:
     if not area_str:
         return []
     parts = [p.strip() for p in area_str.split(",") if p.strip()]
-    return parts
+    city_state_words = {"hyderabad", "bangalore", "bengaluru", "telangana", "karnataka", "india"}
+    specific_parts = [p for p in parts if p.lower() not in city_state_words]
+    return specific_parts if specific_parts else parts
 
 
 def build_gender_filter(gender: Optional[str]):
@@ -283,13 +285,18 @@ def score_pg_candidate(
     pg_addr = pg.location.address.lower() if pg.location and pg.location.address else ""
     if area:
         area_keywords = [k.lower().strip() for k in extract_area_keywords(area)]
-        area_match = any(k in pg_area or k in pg_addr for k in area_keywords if k)
-        if area_match:
+        direct_area_match = any(k in pg_area or pg_area in k for k in area_keywords if k)
+        addr_match = any(k in pg_addr for k in area_keywords if k)
+        if direct_area_match:
             score += 35.0
+            details["area_matched"] = True
+        elif addr_match:
+            score += 25.0
             details["area_matched"] = True
         else:
             # Same city fallback score
             score += 15.0
+            details["area_matched"] = False
     else:
         score += 25.0
         details["area_matched"] = True

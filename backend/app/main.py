@@ -19,9 +19,13 @@ default_origins = [
     "http://127.0.0.1:5174",
     "http://localhost:8080",
     "http://localhost",
+    "https://smart-pg-frontend.onrender.com",
+    "https://smart-pg-frontend-svw3.onrender.com",
+    "https://smart-pg.onrender.com",
+    "https://smart-pg-app.onrender.com",
 ]
-custom_origins = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
-frontend_url = os.getenv("FRONTEND_URL", "").strip()
+custom_origins = [o.strip().rstrip("/") for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
+frontend_url = os.getenv("FRONTEND_URL", "").strip().rstrip("/")
 if frontend_url:
     custom_origins.append(frontend_url)
 
@@ -30,6 +34,7 @@ allowed_origins = list(set(default_origins + custom_origins))
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
+    allow_origin_regex=r"https://.*\.onrender\.com|https://.*\.vercel\.app|https://.*\.pages\.dev|https://.*\.netlify\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

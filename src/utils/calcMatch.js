@@ -144,7 +144,8 @@ export function calcMatch(pg, u = {}) {
   const pgCity = normalizeText(pg.city);
 
   if (requestedArea) {
-    if (pgArea.includes(requestedArea)) {
+    const isAreaMatch = pgArea && (pgArea.includes(requestedArea) || requestedArea.includes(pgArea));
+    if (isAreaMatch) {
       const score = locationScore(90, pg.distance);
       factors.push(makeFactor('location', 'Location', score, `Area matches your preference: ${pg.area}${typeof pg.distance === 'number' ? ` · ${pg.distance} km from your selected hub` : ''}`, true));
       reasons.push(`${pgName} is in your selected area: ${pg.area}`);

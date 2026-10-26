@@ -32,7 +32,7 @@ export default function Footer() {
             <li><Link to="/explore">Find a PG</Link></li>
             <li><Link to="/compare">Compare Stays</Link></li>
             <li><Link to="/register">Create Account</Link></li>
-            <li><Link to="/login">Owner Login</Link></li>
+            <li><Link to="/login" state={{ role: "owner" }}>Owner Login</Link></li>
           </ul>
         </div>
 
